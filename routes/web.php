@@ -19,4 +19,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Livewire\Admin\Dashboard::class, 'dashboard'])->name('home');
+
+// Admin Routes
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/', App\Http\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
+    Route::get('/profile', App\Http\Livewire\Admin\Profile::class)->name('admin.profile');
+    Route::get('/business', App\Http\Livewire\Admin\BusinessInfo::class)->name('admin.business');
+    Route::get('/products', App\Http\Livewire\Admin\Products::class)->name('admin.products');
+    Route::get('/sales', App\Http\Livewire\Admin\SalesReports::class)->name('admin.sales');
+});
