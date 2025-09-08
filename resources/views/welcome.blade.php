@@ -122,7 +122,7 @@
                         sube hasta <strong>30 productos</strong> y comienza a vender online hoy mismo.
                     </p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="{{ route('register') }}" class="btn btn-warning btn-lg btn-custom animate-pulse">
+                        <a href="{{ route('register', ['plan' => 'monthly']) }}" class="btn btn-warning btn-lg btn-custom animate-pulse">
                             <i class="fas fa-rocket me-2"></i>Comenzar Ahora
                         </a>
                         <a href="#caracteristicas" class="btn btn-outline-light btn-lg btn-custom">
@@ -241,7 +241,7 @@
                             <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Soporte 24/7</li>
                             <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Reportes básicos</li>
                         </ul>
-                        <a href="{{ route('register') }}" class="btn btn-primary-custom btn-custom w-100">
+                        <a href="{{ route('register', ['plan' => 'monthly']) }}" class="btn btn-primary-custom btn-custom w-100">
                             <i class="fas fa-credit-card me-2"></i>Comenzar Ahora
                         </a>
                     </div>
@@ -266,7 +266,7 @@
                             <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Hasta 100 productos</li>
                             <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Soporte prioritario</li>
                         </ul>
-                        <a href="{{ route('register') }}" class="btn btn-secondary-custom btn-custom w-100">
+                        <a href="{{ route('register', ['plan' => 'annual']) }}" class="btn btn-secondary-custom btn-custom w-100">
                             <i class="fas fa-star me-2"></i>¡Quiero Este Plan!
                         </a>
                     </div>
@@ -404,7 +404,7 @@
                     <h2 class="display-4 fw-bold mb-4">¿Listo para Hacer Crecer tu Negocio?</h2>
                     <p class="lead mb-5">Únete a más de 500 negocios exitosos que ya confían en TuVitrina</p>
                     <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <a href="{{ route('register') }}" class="btn btn-warning btn-lg btn-custom animate-pulse">
+                        <a href="{{ route('register', ['plan' => 'monthly']) }}" class="btn btn-warning btn-lg btn-custom animate-pulse">
                             <i class="fas fa-rocket me-2"></i>Comenzar Gratis Ahora
                         </a>
                         <a href="#precios" class="btn btn-outline-light btn-lg btn-custom">

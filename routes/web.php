@@ -24,7 +24,10 @@ Route::post('/catalogo/{slug}/order', [App\Http\Controllers\CatalogController::c
 Route::get('/catalogo/{slug}/orden/{orderNumber}', [App\Http\Controllers\CatalogController::class, 'orderConfirmation'])->name('catalog.order-confirmation');
 Route::post('/catalogo/{slug}/upload-payment-proof/{orderNumber}', [App\Http\Controllers\CatalogController::class, 'uploadPaymentProof'])->name('catalog.upload-payment-proof');
 
-Auth::routes();
+// Ruta personalizada para registro con parámetro de plan (debe ir antes de Auth::routes())
+Route::get('/register/{plan?}', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+
+Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Livewire\Admin\Dashboard::class, 'dashboard'])->name('home');
 

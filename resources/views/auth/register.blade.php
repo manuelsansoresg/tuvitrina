@@ -110,6 +110,49 @@
         </div>
     </div>
     
+    <!-- Plan Selection -->
+    <div class="mb-4">
+        <label class="form-label fw-bold">
+            <i class="fas fa-crown me-2"></i>Selecciona tu Plan
+        </label>
+        <p class="text-muted small mb-3">Debes seleccionar un plan para continuar con el registro</p>
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="plan-option">
+                    <input type="radio" class="btn-check" name="selected_plan" id="plan_monthly" value="monthly" required {{ (old('selected_plan', $plan ?? '') == 'monthly') ? 'checked' : '' }}>
+                    <label class="btn btn-outline-primary w-100 p-3" for="plan_monthly">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="fas fa-rocket fs-4 mb-2"></i>
+                            <strong>Plan Mensual</strong>
+                            <span class="text-muted small">$100/mes</span>
+                            <span class="badge bg-success mt-1">¡3 meses gratis!</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="plan-option">
+                    <input type="radio" class="btn-check" name="selected_plan" id="plan_annual" value="annual" required {{ (old('selected_plan', $plan ?? '') == 'annual') ? 'checked' : '' }}>
+                    <label class="btn btn-outline-warning w-100 p-3" for="plan_annual">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="fas fa-crown fs-4 mb-2"></i>
+                            <strong>Plan Anual</strong>
+                            <span class="text-muted small">$1,000/año</span>
+                            <span class="badge bg-warning text-dark mt-1">¡Más popular!</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        @error('selected_plan')
+            <div class="text-danger mt-2">
+                <small><strong>{{ $message }}</strong></small>
+            </div>
+        @enderror
+    </div>
+
     <div class="d-grid mb-3">
         <button type="submit" class="btn btn-primary btn-lg">
             <i class="fas fa-user-plus me-2"></i>Crear Mi Cuenta

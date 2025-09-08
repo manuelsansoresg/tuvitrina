@@ -42,6 +42,22 @@ class RegisterController extends Controller
     }
 
     /**
+     * Show the application registration form with optional plan parameter.
+     *
+     * @param  string|null  $plan
+     * @return \Illuminate\Http\Response
+     */
+    public function showRegistrationForm($plan = null)
+    {
+        // Validar que el plan sea válido si se proporciona
+        if ($plan && !in_array($plan, ['monthly', 'annual'])) {
+            $plan = null;
+        }
+
+        return view('auth.register', compact('plan'));
+    }
+
+    /**
      * Get a validator for an incoming registration request.
      *
      * @param  array  $data
@@ -56,6 +72,10 @@ class RegisterController extends Controller
             'phone' => ['required', 'string', 'max:15'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'selected_plan' => ['required', 'string', 'in:monthly,annual'],
+        ], [
+            'selected_plan.required' => 'Debes seleccionar un plan para continuar con el registro.',
+            'selected_plan.in' => 'El plan seleccionado no es válido.',
         ]);
     }
 
@@ -75,6 +95,7 @@ class RegisterController extends Controller
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'selected_plan' => $data['selected_plan'],
         ]);
     }
 }
