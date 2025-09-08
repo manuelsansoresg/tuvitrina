@@ -20,6 +20,17 @@
             <i class="fas fa-search"></i>
             <input type="text" wire:model="search" placeholder="Buscar productos..." class="search-input">
         </div>
+        @if(auth()->user()->hasRole('superadmin'))
+        <div class="business-filter">
+            <label>Empresa:</label>
+            <select wire:model="businessFilter" class="select-input">
+                <option value="all">Todas las empresas</option>
+                @foreach($businesses as $business)
+                    <option value="{{ $business->id }}">{{ $business->business_name }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
         <div class="per-page-selector">
             <label>Mostrar:</label>
             <select wire:model="perPage" class="select-input">
@@ -159,6 +170,23 @@
                             @error('description') <span class="error-message">{{ $message }}</span> @enderror
                         </div>
                     </div>
+
+                    @if(auth()->user()->hasRole('superadmin'))
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="selectedUserId">Empresa/Usuario *</label>
+                            <select id="selectedUserId" wire:model="selectedUserId" class="form-input">
+                                <option value="">Seleccionar empresa...</option>
+                                @foreach($adminUsers as $adminUser)
+                                    <option value="{{ $adminUser->id }}">
+                                        {{ $adminUser->business ? $adminUser->business->business_name : 'Sin empresa' }} - {{ $adminUser->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('selectedUserId') <span class="error-message">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="form-row">
                         <div class="form-group half">

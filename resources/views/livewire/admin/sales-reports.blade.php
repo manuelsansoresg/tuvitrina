@@ -95,6 +95,17 @@
                     <label>Producto:</label>
                     <input type="text" wire:model="productFilter" placeholder="Buscar por producto..." class="filter-input">
                 </div>
+                @if(auth()->user()->hasRole('superadmin'))
+                <div class="filter-input-group">
+                    <label>Empresa:</label>
+                    <select wire:model="businessFilter" class="filter-select">
+                        <option value="all">Todas las empresas</option>
+                        @foreach($businesses as $business)
+                            <option value="{{ $business->id }}">{{ $business->business_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
                 <div class="filter-input-group">
                     <label>Mostrar:</label>
                     <select wire:model="perPage" class="filter-select">
@@ -178,13 +189,14 @@
 
     <!-- Sales Table -->
     <div class="sales-table-section">
-        <h4>Detalle de Ventas</h4>
+        <h4>Detalle de Transacciones</h4>
         <div class="table-container">
             <table class="sales-table">
                 <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Producto/Orden</th>
                         <th>Cantidad</th>
                         <th>Precio Unitario</th>
                         <th>Total</th>
@@ -192,25 +204,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($sales as $sale)
+                    @forelse($paginator as $transaction)
                         <tr>
-                            <td>{{ $sale->sale_date->format('d/m/Y H:i') }}</td>
+                            <td>{{ $transaction->date->format('d/m/Y H:i') }}</td>
+                            <td>
+                                @if($transaction->type === 'sale')
+                                    <span class="badge badge-primary">Venta</span>
+                                @else
+                                    <span class="badge badge-success">Orden</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="product-cell">
-                                    <strong>{{ $sale->product->name ?? 'Producto eliminado' }}</strong>
+                                    @if($transaction->type === 'order')
+                                        <strong>Orden #{{ $transaction->order_number }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ $transaction->product_name }}</small>
+                                    @else
+                                        <strong>{{ $transaction->product_name }}</strong>
+                                    @endif
                                 </div>
                             </td>
-                            <td class="quantity-cell">{{ $sale->quantity }}</td>
-                            <td class="price-cell">${{ number_format($sale->unit_price, 2) }}</td>
-                            <td class="total-cell">${{ number_format($sale->total_amount, 2) }}</td>
-                            <td>{{ $sale->customer_name ?? 'Cliente anónimo' }}</td>
+                            <td class="quantity-cell">{{ $transaction->quantity }}</td>
+                            <td class="price-cell">
+                                @if($transaction->unit_price)
+                                    ${{ number_format($transaction->unit_price, 2) }}
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td class="total-cell">${{ number_format($transaction->total_amount, 2) }}</td>
+                            <td>
+                                {{ $transaction->customer_name }}
+                                @if($transaction->customer_email)
+                                    <br>
+                                    <small class="text-muted">{{ $transaction->customer_email }}</small>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="no-sales">
+                            <td colspan="7" class="no-sales">
                                 <div class="empty-state">
                                     <i class="fas fa-receipt"></i>
-                                    <p>No hay ventas registradas en el período seleccionado</p>
+                                    <p>No hay transacciones registradas en el período seleccionado</p>
                                 </div>
                             </td>
                         </tr>
@@ -220,9 +257,9 @@
         </div>
 
         <!-- Pagination -->
-        @if($sales->hasPages())
+        @if($paginator->hasPages())
             <div class="pagination-wrapper">
-                {{ $sales->links() }}
+                {{ $paginator->links() }}
             </div>
         @endif
     </div>
@@ -298,6 +335,29 @@
     color: #6b7280;
     margin: 0;
     font-size: 14px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.badge-primary {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.badge-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.text-muted {
+    color: #6b7280;
+    font-size: 0.875em;
 }
 
 .filters-section {

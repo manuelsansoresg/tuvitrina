@@ -6,6 +6,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Sale;
 use App\Models\Product;
+use App\Models\Order;
+use App\Models\Business;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +18,7 @@ class SalesReports extends Component
     public $dateFrom;
     public $dateTo;
     public $productFilter = '';
+    public $businessFilter = 'all';
     public $reportType = 'daily'; // daily, weekly, monthly, yearly
     public $perPage = 15;
 
@@ -37,6 +40,11 @@ class SalesReports extends Component
     }
 
     public function updatingProductFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingBusinessFilter()
     {
         $this->resetPage();
     }
@@ -85,8 +93,27 @@ class SalesReports extends Component
 
     public function getSalesData()
     {
-        $query = Sale::where('user_id', auth()->id())
-            ->when($this->dateFrom, function ($q) {
+        $user = auth()->user();
+        
+        $query = Sale::query();
+        
+        // Aplicar filtros según el rol del usuario
+        if ($user->hasRole('superadmin')) {
+            // Superadmin puede ver todas las ventas o filtrar por empresa
+            if ($this->businessFilter !== 'all') {
+                $query->whereHas('product.user.business', function($q) {
+                    $q->where('id', $this->businessFilter);
+                });
+            }
+        } else {
+            // Admin solo puede ver las ventas de su empresa
+            if (!$user->business) {
+                return Sale::whereRaw('1 = 0'); // Query vacío
+            }
+            $query->where('business_id', $user->business->id);
+        }
+        
+        $query->when($this->dateFrom, function ($q) {
                 $q->whereDate('sale_date', '>=', $this->dateFrom);
             })
             ->when($this->dateTo, function ($q) {
@@ -101,82 +128,220 @@ class SalesReports extends Component
         return $query;
     }
 
+    public function getOrdersData()
+    {
+        $user = auth()->user();
+        
+        $query = Order::where('status', 'completed');
+        
+        // Aplicar filtros según el rol del usuario
+        if ($user->hasRole('superadmin')) {
+            // Superadmin puede ver todas las órdenes o filtrar por empresa
+            if ($this->businessFilter !== 'all') {
+                $query->where('business_id', $this->businessFilter);
+            }
+        } else {
+            // Admin solo puede ver las órdenes de su empresa
+            if (!$user->business) {
+                return Order::whereRaw('1 = 0'); // Query vacío
+            }
+            $query->where('business_id', $user->business->id);
+        }
+        
+        $query->when($this->dateFrom, function ($q) {
+                $q->whereDate('created_at', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($q) {
+                $q->whereDate('created_at', '<=', $this->dateTo);
+            })
+            ->when($this->productFilter, function ($q) {
+                $q->whereHas('items.product', function ($productQuery) {
+                    $productQuery->where('name', 'like', '%' . $this->productFilter . '%');
+                });
+            });
+
+        return $query;
+    }
+
     public function getStatistics()
     {
         $salesQuery = $this->getSalesData();
+        $ordersQuery = $this->getOrdersData();
         
+        // Sales statistics
         $totalSales = $salesQuery->count();
-        $totalRevenue = $salesQuery->sum('total_amount');
-        $averageSale = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
+        $totalSalesRevenue = $salesQuery->sum('total_amount');
         
-        // Top selling products
-        $topProducts = $salesQuery->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(total_amount) as total_revenue'))
+        // Orders statistics
+        $totalOrders = $ordersQuery->count();
+        $totalOrdersRevenue = $ordersQuery->sum('total_amount');
+        
+        // Combined statistics
+        $totalTransactions = $totalSales + $totalOrders;
+        $totalRevenue = $totalSalesRevenue + $totalOrdersRevenue;
+        $averageSale = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
+        
+        // Top selling products from sales
+        $topProductsSales = $salesQuery->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(total_amount) as total_revenue'))
             ->with('product')
             ->groupBy('product_id')
-            ->orderBy('total_quantity', 'desc')
-            ->limit(5)
             ->get();
+            
+        // Top selling products from orders
+        $topProductsOrders = $ordersQuery->with('items.product')
+            ->get()
+            ->flatMap(function ($order) {
+                return $order->items->map(function ($item) {
+                    return [
+                        'product_id' => $item->product_id,
+                        'total_quantity' => $item->quantity,
+                        'total_revenue' => $item->total_price,
+                        'product' => $item->product
+                    ];
+                });
+            })
+            ->groupBy('product_id')
+            ->map(function ($items, $productId) {
+                return (object) [
+                    'product_id' => $productId,
+                    'total_quantity' => $items->sum('total_quantity'),
+                    'total_revenue' => $items->sum('total_revenue'),
+                    'product' => $items->first()['product']
+                ];
+            })
+            ->values();
+            
+        // Combine and get top products
+        $allProducts = $topProductsSales->concat($topProductsOrders)
+            ->groupBy('product_id')
+            ->map(function ($items) {
+                return (object) [
+                    'product_id' => $items->first()->product_id,
+                    'total_quantity' => $items->sum('total_quantity'),
+                    'total_revenue' => $items->sum('total_revenue'),
+                    'product' => $items->first()->product
+                ];
+            })
+            ->sortByDesc('total_quantity')
+            ->take(5)
+            ->values();
 
         // Sales by period
         $salesByPeriod = $this->getSalesByPeriod();
 
         return [
-            'total_sales' => $totalSales,
+            'total_sales' => $totalTransactions,
             'total_revenue' => $totalRevenue,
             'average_sale' => $averageSale,
-            'top_products' => $topProducts,
-            'sales_by_period' => $salesByPeriod
+            'top_products' => $allProducts,
+            'sales_by_period' => $salesByPeriod,
+            'sales_breakdown' => [
+                'traditional_sales' => $totalSales,
+                'orders' => $totalOrders,
+                'sales_revenue' => $totalSalesRevenue,
+                'orders_revenue' => $totalOrdersRevenue
+            ]
         ];
     }
 
     private function getSalesByPeriod()
     {
         $salesQuery = $this->getSalesData();
+        $ordersQuery = $this->getOrdersData();
         
         switch ($this->reportType) {
             case 'daily':
-                return $salesQuery->select(
+                $salesByPeriod = $salesQuery->select(
                     DB::raw('DATE(sale_date) as period'),
                     DB::raw('COUNT(*) as sales_count'),
                     DB::raw('SUM(total_amount) as revenue')
                 )
                 ->groupBy('period')
-                ->orderBy('period')
                 ->get();
                 
+                $ordersByPeriod = $ordersQuery->select(
+                    DB::raw('DATE(created_at) as period'),
+                    DB::raw('COUNT(*) as sales_count'),
+                    DB::raw('SUM(total_amount) as revenue')
+                )
+                ->groupBy('period')
+                ->get();
+                break;
+                
             case 'weekly':
-                return $salesQuery->select(
+                $salesByPeriod = $salesQuery->select(
                     DB::raw('YEARWEEK(sale_date) as period'),
                     DB::raw('COUNT(*) as sales_count'),
                     DB::raw('SUM(total_amount) as revenue')
                 )
                 ->groupBy('period')
-                ->orderBy('period')
                 ->get();
                 
+                $ordersByPeriod = $ordersQuery->select(
+                    DB::raw('YEARWEEK(created_at) as period'),
+                    DB::raw('COUNT(*) as sales_count'),
+                    DB::raw('SUM(total_amount) as revenue')
+                )
+                ->groupBy('period')
+                ->get();
+                break;
+                
             case 'monthly':
-                return $salesQuery->select(
+                $salesByPeriod = $salesQuery->select(
                     DB::raw('DATE_FORMAT(sale_date, "%Y-%m") as period'),
                     DB::raw('COUNT(*) as sales_count'),
                     DB::raw('SUM(total_amount) as revenue')
                 )
                 ->groupBy('period')
-                ->orderBy('period')
                 ->get();
                 
+                $ordersByPeriod = $ordersQuery->select(
+                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
+                    DB::raw('COUNT(*) as sales_count'),
+                    DB::raw('SUM(total_amount) as revenue')
+                )
+                ->groupBy('period')
+                ->get();
+                break;
+                
             case 'yearly':
-                return $salesQuery->select(
+                $salesByPeriod = $salesQuery->select(
                     DB::raw('YEAR(sale_date) as period'),
                     DB::raw('COUNT(*) as sales_count'),
                     DB::raw('SUM(total_amount) as revenue')
                 )
                 ->groupBy('period')
-                ->orderBy('period')
                 ->get();
+                
+                $ordersByPeriod = $ordersQuery->select(
+                    DB::raw('YEAR(created_at) as period'),
+                    DB::raw('COUNT(*) as sales_count'),
+                    DB::raw('SUM(total_amount) as revenue')
+                )
+                ->groupBy('period')
+                ->get();
+                break;
                 
             default:
                 return collect();
         }
+        
+        // Combine sales and orders by period
+        $combinedData = collect();
+        $allPeriods = $salesByPeriod->pluck('period')->merge($ordersByPeriod->pluck('period'))->unique()->sort();
+        
+        foreach ($allPeriods as $period) {
+            $salesData = $salesByPeriod->firstWhere('period', $period);
+            $ordersData = $ordersByPeriod->firstWhere('period', $period);
+            
+            $combinedData->push((object) [
+                'period' => $period,
+                'sales_count' => ($salesData->sales_count ?? 0) + ($ordersData->sales_count ?? 0),
+                'revenue' => ($salesData->revenue ?? 0) + ($ordersData->revenue ?? 0)
+            ]);
+        }
+        
+        return $combinedData;
     }
 
     public function exportReport($format = 'csv')
@@ -190,12 +355,69 @@ class SalesReports extends Component
         $sales = $this->getSalesData()
             ->with(['product'])
             ->orderBy('sale_date', 'desc')
-            ->paginate($this->perPage);
+            ->get()
+            ->map(function ($sale) {
+                return (object) [
+                    'id' => $sale->id,
+                    'type' => 'sale',
+                    'date' => $sale->sale_date,
+                    'customer_name' => 'Venta directa',
+                    'customer_email' => null,
+                    'total_amount' => $sale->total_amount,
+                    'product_name' => $sale->product->name ?? 'Producto eliminado',
+                    'quantity' => $sale->quantity,
+                    'unit_price' => $sale->unit_price
+                ];
+            });
+            
+        $orders = $this->getOrdersData()
+            ->with(['items.product'])
+            ->orderBy('order_date', 'desc')
+            ->get()
+            ->map(function ($order) {
+                return (object) [
+                    'id' => $order->id,
+                    'type' => 'order',
+                    'date' => $order->order_date,
+                    'customer_name' => $order->customer_name,
+                    'customer_email' => $order->customer_email,
+                    'total_amount' => $order->total_amount,
+                    'product_name' => $order->items->count() . ' productos',
+                    'quantity' => $order->items->sum('quantity'),
+                    'unit_price' => null,
+                    'order_number' => $order->order_number
+                ];
+            });
+            
+        // Combine and paginate
+        $allTransactions = $sales->concat($orders)
+            ->sortByDesc('date')
+            ->values();
+            
+        // Manual pagination
+        $currentPage = request()->get('page', 1);
+        $perPage = $this->perPage;
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedTransactions = $allTransactions->slice($offset, $perPage);
+        
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedTransactions,
+            $allTransactions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'pageName' => 'page']
+        );
 
         $statistics = $this->getStatistics();
         $products = Product::where('user_id', auth()->id())->get();
+        
+        // Obtener todas las empresas para el filtro (solo para superadmin)
+        $businesses = collect();
+        if (auth()->user()->hasRole('superadmin')) {
+            $businesses = Business::orderBy('business_name')->get();
+        }
 
-        return view('livewire.admin.sales-reports', compact('sales', 'statistics', 'products'))
+        return view('livewire.admin.sales-reports', compact('paginator', 'statistics', 'products', 'businesses'))
             ->layout('layouts.admin');
     }
 }

@@ -6,6 +6,24 @@
         </div>
     @endif
     
+    @if($business_name && $this->businessSlug)
+        <div class="alert alert-info mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    <strong>Tu catálogo público está disponible en:</strong>
+                </div>
+                <a href="{{ route('catalog.show', $this->businessSlug) }}" 
+                   target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye me-2"></i>Ver Catálogo
+                </a>
+            </div>
+            <small class="text-muted d-block mt-2">
+                {{ route('catalog.show', $this->businessSlug) }}
+            </small>
+        </div>
+    @endif
+    
     <form wire:submit.prevent="saveBusiness">
         <div class="row">
             <!-- Información Básica -->

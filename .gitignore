@@ -1,6 +1,11 @@
 /node_modules
 /public/hot
-/public/storage
+/public/images/business/*
+!/public/images/business/.gitkeep
+/public/images/products/*
+!/public/images/products/.gitkeep
+/public/payment-proofs/*
+!/public/payment-proofs/.gitkeep
 /storage/*.key
 /vendor
 .env

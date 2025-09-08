@@ -142,6 +142,11 @@ class BusinessInfo extends Component
         }
     }
     
+    public function getBusinessSlugProperty()
+    {
+        return $this->business_name ? Str::slug($this->business_name) : null;
+    }
+    
     public function render()
     {
         return view('livewire.admin.business-info')->layout('layouts.admin');

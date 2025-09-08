@@ -6,6 +6,8 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use App\Models\Product;
+use App\Models\Business;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -18,6 +20,8 @@ class Products extends Component
     public $productId, $isEditing = false;
     public $showModal = false;
     public $search = '';
+    public $businessFilter = 'all';
+    public $selectedUserId;
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
     public $perPage = 10;
@@ -38,11 +42,18 @@ class Products extends Component
         'stock.required' => 'El stock es obligatorio.',
         'stock.integer' => 'El stock debe ser un número entero.',
         'stock.min' => 'El stock no puede ser negativo.',
+        'selectedUserId.required' => 'Debe seleccionar una empresa/usuario.',
+        'selectedUserId.exists' => 'La empresa/usuario seleccionado no es válido.',
         'images.*.image' => 'Solo se permiten archivos de imagen.',
         'images.*.max' => 'Cada imagen no puede exceder 2MB.'
     ];
 
     public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+    
+    public function updatingBusinessFilter()
     {
         $this->resetPage();
     }
@@ -78,12 +89,19 @@ class Products extends Component
         $this->images = [];
         $this->productId = null;
         $this->isEditing = false;
+        $this->selectedUserId = null;
         $this->resetErrorBag();
     }
 
     public function saveProduct()
     {
-        $this->validate();
+        // Validación condicional para superadmin
+        $rules = $this->rules;
+        if (auth()->user()->hasRole('superadmin')) {
+            $rules['selectedUserId'] = 'required|exists:users,id';
+        }
+        
+        $this->validate($rules);
         
         // Validate only new uploaded images
         if (!empty($this->images)) {
@@ -99,8 +117,14 @@ class Products extends Component
             }
         }
 
+        // Determinar el user_id según el rol
+        $userId = auth()->id();
+        if (auth()->user()->hasRole('superadmin') && $this->selectedUserId) {
+            $userId = $this->selectedUserId;
+        }
+        
         $productData = [
-            'user_id' => auth()->id(),
+            'user_id' => $userId,
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price,
@@ -135,14 +159,8 @@ class Products extends Component
                         mkdir($destinationPath, 0755, true);
                     }
                     
-                    // Move the uploaded file
-                    $image->storeAs('', $filename, ['disk' => 'public']);
-                    $tempPath = storage_path('app/public/' . $filename);
-                    $finalPath = $destinationPath . '/' . $filename;
-                    
-                    if (file_exists($tempPath)) {
-                        rename($tempPath, $finalPath);
-                    }
+                    // Move the uploaded file directly to public
+                    $image->move($destinationPath, $filename);
                     
                     $imagePaths[] = 'images/products/' . $filename;
                     $newImagesUploaded = true;
@@ -177,6 +195,7 @@ class Products extends Component
         $this->description = $product->description;
         $this->price = $product->price;
         $this->stock = $product->stock;
+        $this->selectedUserId = $product->user_id;
         
         // Load existing images
         if ($product->images) {
@@ -245,15 +264,41 @@ class Products extends Component
 
     public function render()
     {
-        $products = Product::where('user_id', auth()->id())
-            ->when($this->search, function ($query) {
+        $user = auth()->user();
+        $query = Product::with('user.business');
+        
+        // Aplicar filtros según rol
+        if ($user->hasRole('superadmin')) {
+            // Los superadmin ven todos los productos, pero pueden filtrar por empresa
+            if ($this->businessFilter !== 'all') {
+                $query->whereHas('user.business', function($q) {
+                    $q->where('id', $this->businessFilter);
+                });
+            }
+        } elseif ($user->hasRole('admin')) {
+            // Los admin solo ven productos de su empresa
+            $query->where('user_id', $user->id);
+        } else {
+            // Otros roles no tienen acceso
+            $query->whereRaw('1 = 0');
+        }
+        
+        $products = $query->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('description', 'like', '%' . $this->search . '%');
             })
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate($this->perPage);
+        
+        // Obtener todas las empresas para el filtro (solo para superadmin)
+        $businesses = collect();
+        $adminUsers = collect();
+        if ($user->hasRole('superadmin')) {
+            $businesses = Business::orderBy('business_name')->get();
+            $adminUsers = User::role('admin')->with('business')->orderBy('name')->get();
+        }
 
-        return view('livewire.admin.products', compact('products'))
+        return view('livewire.admin.products', compact('products', 'businesses', 'adminUsers'))
             ->layout('layouts.admin');
     }
 }

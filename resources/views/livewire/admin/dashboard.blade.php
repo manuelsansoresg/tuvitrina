@@ -1,4 +1,25 @@
 <div>
+    @if(auth()->user()->hasRole('superadmin'))
+    <!-- Filtro por Empresa -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                        <label for="businessFilter" class="form-label mb-0 fw-bold">Filtrar por Empresa:</label>
+                        <select wire:model="businessFilter" id="businessFilter" class="form-select" style="width: auto;">
+                            <option value="all">Todas las empresas</option>
+                            @foreach($businesses as $business)
+                                <option value="{{ $business->id }}">{{ $business->business_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+    
     <!-- Estadísticas Generales -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">

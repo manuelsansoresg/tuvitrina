@@ -279,6 +279,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
+                    <a href="{{ route('admin.orders') }}" class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
+                        <i class="fas fa-shopping-cart"></i>
+                        Órdenes
+                    </a>
+                </div>
+                <div class="nav-item">
                     <a href="{{ route('admin.sales') }}" class="nav-link {{ request()->routeIs('admin.sales') ? 'active' : '' }}">
                         <i class="fas fa-chart-line"></i>
                         Reportes de Ventas
