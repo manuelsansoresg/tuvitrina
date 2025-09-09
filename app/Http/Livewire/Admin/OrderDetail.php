@@ -101,9 +101,73 @@ class OrderDetail extends Component
         // Actualizar estado de la orden
         $paymentProof->order->update(['status' => 'confirmed']);
 
+        // Verificar si es una orden de suscripción y activar la suscripción
+        $this->activateSubscriptionIfNeeded($paymentProof->order);
+
         session()->flash('message', 'Comprobante aprobado y orden confirmada.');
         $this->adminNotes = '';
         $this->order->refresh();
+    }
+
+    private function activateSubscriptionIfNeeded($order)
+    {
+        // Verificar si es una orden de suscripción (contiene "Usuario ID:" en las notas)
+        if (strpos($order->notes, 'Usuario ID:') !== false) {
+            // Extraer el ID del usuario de las notas
+            preg_match('/Usuario ID: (\d+)/', $order->notes, $matches);
+            if (isset($matches[1])) {
+                $userId = $matches[1];
+                $user = \App\Models\User::find($userId);
+                
+                if ($user) {
+                    // Determinar el tipo de plan desde las notas
+                    $isMonthly = strpos($order->notes, 'mensual') !== false;
+                    $planType = $isMonthly ? 'monthly' : 'annual';
+                    $isRenewal = strpos($order->notes, 'Renovación') !== false;
+                    
+                    if ($isRenewal) {
+                        // Para renovaciones, extender la suscripción existente
+                        $currentEnd = $user->subscription_end ? \Carbon\Carbon::parse($user->subscription_end) : now();
+                        
+                        // Si la suscripción ya venció, empezar desde hoy
+                        if ($currentEnd->lt(now())) {
+                            $currentEnd = now();
+                        }
+                        
+                        // Extender la suscripción
+                        $newEndDate = $isMonthly ? $currentEnd->copy()->addMonth() : $currentEnd->copy()->addYear();
+                        
+                        $user->update([
+                            'subscription_status' => 'active',
+                            'subscription_end' => $newEndDate,
+                            'selected_plan' => $planType,
+                            'last_payment_date' => now(),
+                        ]);
+                        
+                        // Enviar notificación de renovación
+                        $user->notify(new \App\Notifications\SubscriptionRenewedNotification($planType, $newEndDate));
+                    } else {
+                        // Para nuevas suscripciones
+                        if ($user->subscription_status !== 'active') {
+                            // Calcular fechas de suscripción
+                            $startDate = now();
+                            $endDate = $isMonthly ? $startDate->copy()->addMonth() : $startDate->copy()->addYear();
+                            
+                            // Activar la suscripción
+                            $user->update([
+                                'subscription_status' => 'active',
+                                'subscription_start' => $startDate,
+                                'subscription_end' => $endDate,
+                                'selected_plan' => $planType,
+                            ]);
+                            
+                            // Enviar notificación de activación
+                            $user->notify(new \App\Notifications\SubscriptionActivatedNotification($planType, $endDate));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function rejectPayment($paymentProofId)

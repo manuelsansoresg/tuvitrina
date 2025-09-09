@@ -8,7 +8,7 @@
     <p class="text-muted">Únete a TuVitrina y comienza a vender tus productos</p>
 </div>
 
-<form method="POST" action="{{ route('register') }}">
+<form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
     @csrf
     
     <div class="row">
@@ -151,6 +151,14 @@
                 <small><strong>{{ $message }}</strong></small>
             </div>
         @enderror
+    </div>
+
+
+
+    <!-- Información del proceso -->
+    <div class="alert alert-info mb-4">
+        <h6><i class="fas fa-info-circle me-2"></i>Proceso de Registro</h6>
+        <p class="mb-0">Después de crear tu cuenta, recibirás un correo electrónico con las instrucciones para completar tu registro y activar tu suscripción.</p>
     </div>
 
     <div class="d-grid mb-3">

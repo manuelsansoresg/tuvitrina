@@ -290,6 +290,22 @@
                         Reportes de Ventas
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('admin.subscription') }}" class="nav-link {{ request()->routeIs('admin.subscription') ? 'active' : '' }}">
+                        <i class="fas fa-credit-card"></i>
+                        Suscripción
+                    </a>
+                </div>
+                
+                @if(auth()->user()->hasRole('superadmin'))
+                    <div class="nav-item">
+                        <a href="{{ route('admin.subscription-payments') }}" class="nav-link {{ request()->routeIs('admin.subscription-payments') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Comprobantes de Registro
+                        </a>
+                    </div>
+                @endif
+                
                 <div class="nav-item mt-4">
                     <a href="{{ route('logout') }}" class="nav-link" 
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

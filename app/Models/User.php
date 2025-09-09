@@ -27,6 +27,10 @@ class User extends Authenticatable
         'email',
         'password',
         'selected_plan',
+        'subscription_expires_at',
+        'subscription_status',
+        'last_payment_date',
+        'renewal_notification_sent',
     ];
 
     /**
@@ -46,6 +50,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'subscription_expires_at' => 'datetime',
+        'last_payment_date' => 'datetime',
+        'renewal_notification_sent' => 'boolean',
     ];
 
     public function business()
@@ -63,8 +70,52 @@ class User extends Authenticatable
         return $this->hasMany(Sale::class);
     }
 
+    public function subscriptionPayments()
+    {
+        return $this->hasMany(SubscriptionPayment::class);
+    }
+    
+    public function activeSubscriptionPayment()
+    {
+        return $this->hasOne(SubscriptionPayment::class)
+                    ->where('status', 'completed')
+                    ->where('expires_at', '>', now())
+                    ->latest('expires_at');
+    }
+    
     public function getFullNameAttribute()
     {
         return trim($this->first_name . ' ' . $this->paternal_last_name . ' ' . $this->maternal_last_name);
+    }
+    
+    public function hasActiveSubscription()
+    {
+        return $this->subscription_status === 'active' && 
+               $this->subscription_expires_at && 
+               $this->subscription_expires_at > now();
+    }
+    
+    public function isSubscriptionExpired()
+    {
+        return !$this->subscription_expires_at || $this->subscription_expires_at < now();
+    }
+    
+    public function isSubscriptionExpiringSoon($days = 5)
+    {
+        if (!$this->subscription_expires_at) {
+            return false;
+        }
+        
+        return $this->subscription_expires_at <= now()->addDays($days) && 
+               $this->subscription_expires_at > now();
+    }
+    
+    public function getDaysUntilExpirationAttribute()
+    {
+        if (!$this->subscription_expires_at) {
+            return null;
+        }
+        
+        return now()->diffInDays($this->subscription_expires_at, false);
     }
 }

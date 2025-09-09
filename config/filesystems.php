@@ -42,6 +42,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'subscription_proofs' => [
+            'driver' => 'local',
+            'root' => public_path('subscription-proofs'),
+            'url' => env('APP_URL') . '/subscription-proofs',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

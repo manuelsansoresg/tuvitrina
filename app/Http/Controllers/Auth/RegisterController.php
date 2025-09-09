@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
+use App\Notifications\WelcomeSubscriptionNotification;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class RegisterController extends Controller
 {
@@ -87,7 +91,8 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        // Crear usuario con estado de registro incompleto
+        $user = User::create([
             'name' => $data['first_name'] . ' ' . $data['paternal_last_name'],
             'first_name' => $data['first_name'],
             'paternal_last_name' => $data['paternal_last_name'],
@@ -96,6 +101,59 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'selected_plan' => $data['selected_plan'],
+            'subscription_expires_at' => null,
+            'subscription_status' => 'incomplete', // Estado inicial hasta completar registro
+            'last_payment_date' => null,
         ]);
+        
+        // Crear orden pendiente (sin comprobante aún)
+        $amount = $data['selected_plan'] === 'monthly' ? 29.99 : 299.99;
+        
+        // Calcular fecha de expiración temporal
+        $expiresAt = $data['selected_plan'] === 'monthly' ? 
+            Carbon::now()->addMonth() : 
+            Carbon::now()->addYear();
+            
+        \App\Models\SubscriptionPayment::create([
+            'user_id' => $user->id,
+            'plan_type' => $data['selected_plan'] === 'annual' ? 'yearly' : $data['selected_plan'], // Convertir annual a yearly
+            'amount' => $amount,
+            'status' => 'incomplete', // Estado inicial hasta subir comprobante
+            'payment_method' => 'transfer',
+            'payment_proof_path' => null, // Se llenará cuando suban el comprobante
+            'payment_date' => null, // Se llenará cuando suban el comprobante
+            'expires_at' => $expiresAt, // Campo requerido
+        ]);
+        
+        return $user;
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        $user = $this->create($request->all());
+
+        // Autenticar al usuario
+        Auth::login($user);
+
+        // Enviar email de bienvenida con enlace para completar registro
+        $user->notify(new WelcomeSubscriptionNotification());
+
+        // Redirigir a página de confirmación con datos del registro
+        return redirect()->route('register.confirmation')
+            ->with('user_data', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'plan' => $user->selected_plan,
+                'amount' => $user->selected_plan === 'monthly' ? 29.99 : 299.99
+            ]);
     }
 }

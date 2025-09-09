@@ -405,7 +405,7 @@
                     <p class="lead mb-5">Únete a más de 500 negocios exitosos que ya confían en TuVitrina</p>
                     <div class="d-flex flex-wrap justify-content-center gap-3">
                         <a href="{{ route('register', ['plan' => 'monthly']) }}" class="btn btn-warning btn-lg btn-custom animate-pulse">
-                            <i class="fas fa-rocket me-2"></i>Comenzar Gratis Ahora
+                            <i class="fas fa-rocket me-2"></i>Comenzar  Ahora
                         </a>
                         <a href="#precios" class="btn btn-outline-light btn-lg btn-custom">
                             <i class="fas fa-eye me-2"></i>Ver Planes
@@ -427,44 +427,48 @@
                     <h5 class="fw-bold mb-3">
                         <i class="fas fa-store text-warning me-2"></i>TuVitrina
                     </h5>
-                    <p class="text-muted">La plataforma líder para negocios online en México. Haz crecer tu negocio con nosotros.</p>
+                    <p class="">La plataforma líder para negocios online en México. Haz crecer tu negocio con nosotros.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-warning"><i class="fab fa-facebook fs-4"></i></a>
-                        <a href="#" class="text-warning"><i class="fab fa-instagram fs-4"></i></a>
+                        {{-- <a href="#" class="text-warning"><i class="fab fa-instagram fs-4"></i></a>
                         <a href="#" class="text-warning"><i class="fab fa-twitter fs-4"></i></a>
-                        <a href="#" class="text-warning"><i class="fab fa-whatsapp fs-4"></i></a>
+                        <a href="#" class="text-warning"><i class="fab fa-whatsapp fs-4"></i></a> --}}
                     </div>
                 </div>
-                <div class="col-lg-2 mb-4">
+                <div class="col-lg-5 mb-4">
+
+                </div>
+                {{-- <div class="col-lg-2 mb-4">
                     <h6 class="fw-bold mb-3">Producto</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-muted text-decoration-none">Características</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Precios</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Demo</a></li>
+                        <li><a href="#" class=" text-decoration-none">Características</a></li>
+                        <li><a href="#" class=" text-decoration-none">Precios</a></li>
+                        <li><a href="#" class=" text-decoration-none">Demo</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 mb-4">
                     <h6 class="fw-bold mb-3">Soporte</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-muted text-decoration-none">Centro de Ayuda</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Contacto</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Tutoriales</a></li>
+                        <li><a href="#" class=" text-decoration-none">Centro de Ayuda</a></li>
+                        <li><a href="#" class=" text-decoration-none">Contacto</a></li>
+                        <li><a href="#" class=" text-decoration-none">Tutoriales</a></li>
                     </ul>
                 </div>
+                
                 <div class="col-lg-2 mb-4">
                     <h6 class="fw-bold mb-3">Legal</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-muted text-decoration-none">Términos</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Privacidad</a></li>
-                        <li><a href="#" class="text-muted text-decoration-none">Cookies</a></li>
+                        <li><a href="#" class=" text-decoration-none">Términos</a></li>
+                        <li><a href="#" class=" text-decoration-none">Privacidad</a></li>
+                        <li><a href="#" class=" text-decoration-none">Cookies</a></li>
                     </ul>
-                </div>
+                </div> --}}
                 <div class="col-lg-2 mb-4">
                     <h6 class="fw-bold mb-3">Contacto</h6>
-                    <ul class="list-unstyled text-muted">
-                        <li><i class="fas fa-phone me-2"></i>+52 55 1234 5678</li>
+                    <ul class="list-unstyled ">
+                        {{-- <li><i class="fas fa-phone me-2"></i>+52 55 1234 5678</li> --}}
                         <li><i class="fas fa-envelope me-2"></i>hola@tuvitrina.com</li>
-                        <li><i class="fas fa-map-marker-alt me-2"></i>Ciudad de México</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Mérida yucatán</li>
                     </ul>
                 </div>
             </div>
