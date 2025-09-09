@@ -38,18 +38,32 @@ class SubscriptionPayments extends Component
             ? $startDate->copy()->addMonth() 
             : $startDate->copy()->addYear();
         
+        // Calcular nueva fecha de vencimiento
+        $currentExpiration = $user->subscription_expires_at ? 
+            Carbon::parse($user->subscription_expires_at) : 
+            Carbon::now();
+            
+        // Si la suscripción ya venció, empezar desde hoy
+        if ($currentExpiration->lt(Carbon::now())) {
+            $currentExpiration = Carbon::now();
+        }
+        
+        // Agregar tiempo según el plan
+        $newExpiration = $payment->plan_type === 'monthly' ? 
+            $currentExpiration->addMonth() : 
+            $currentExpiration->addYear();
+        
         // Actualizar estado del pago
         $payment->update([
-            'status' => 'approved',
-            'admin_notes' => $this->adminNotes,
-            'approved_at' => $startDate,
+            'status' => 'completed',
+            'verified_at' => $startDate,
+            'expires_at' => $newExpiration,
         ]);
         
         // Activar suscripción del usuario
         $user->update([
             'subscription_status' => 'active',
-            'subscription_start' => $startDate,
-            'subscription_end' => $endDate,
+            'subscription_expires_at' => $newExpiration,
             'selected_plan' => $payment->plan_type,
             'last_payment_date' => $startDate,
         ]);

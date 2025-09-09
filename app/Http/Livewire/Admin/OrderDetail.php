@@ -127,7 +127,7 @@ class OrderDetail extends Component
                     
                     if ($isRenewal) {
                         // Para renovaciones, extender la suscripción existente
-                        $currentEnd = $user->subscription_end ? \Carbon\Carbon::parse($user->subscription_end) : now();
+                        $currentEnd = $user->subscription_expires_at ? \Carbon\Carbon::parse($user->subscription_expires_at) : now();
                         
                         // Si la suscripción ya venció, empezar desde hoy
                         if ($currentEnd->lt(now())) {
@@ -139,7 +139,7 @@ class OrderDetail extends Component
                         
                         $user->update([
                             'subscription_status' => 'active',
-                            'subscription_end' => $newEndDate,
+                            'subscription_expires_at' => $newEndDate,
                             'selected_plan' => $planType,
                             'last_payment_date' => now(),
                         ]);
@@ -156,9 +156,9 @@ class OrderDetail extends Component
                             // Activar la suscripción
                             $user->update([
                                 'subscription_status' => 'active',
-                                'subscription_start' => $startDate,
-                                'subscription_end' => $endDate,
+                                'subscription_expires_at' => $endDate,
                                 'selected_plan' => $planType,
+                                'last_payment_date' => $startDate,
                             ]);
                             
                             // Enviar notificación de activación
