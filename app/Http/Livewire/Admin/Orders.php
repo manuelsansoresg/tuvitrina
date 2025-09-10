@@ -204,6 +204,11 @@ class Orders extends Component
             ->when($this->statusFilter !== 'all', function($query) {
                 $query->where('status', $this->statusFilter);
             })
+            // Excluir órdenes de suscripción (que contienen 'Usuario ID:' en las notas)
+            ->where(function($query) {
+                $query->whereNull('notes')
+                      ->orWhere('notes', 'not like', '%Usuario ID:%');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
         

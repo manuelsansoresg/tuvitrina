@@ -27,6 +27,11 @@ class CompleteRegistrationController extends Controller
             return redirect()->route('home')->with('info', 'Tu suscripción ya está activa.');
         }
         
+        // Verificar si ya subió el comprobante
+        if ($user->subscription_status === 'pending_approval') {
+            return redirect()->route('home')->with('info', 'Tu comprobante ya fue enviado y está siendo verificado.');
+        }
+        
         return view('auth.complete-registration', compact('user'));
     }
     

@@ -15,7 +15,7 @@ class UpdateSubscriptionStatusEnum extends Migration
     public function up()
     {
         // Modificar el enum para incluir los nuevos valores
-        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_status ENUM('active', 'expired', 'cancelled', 'pending_renewal', 'incomplete', 'pending_approval') DEFAULT 'incomplete'");
+        DB::statement("ALTER TABLE users MODIFY COLUMN subscription_status ENUM('active', 'expired', 'cancelled', 'pending_renewal', 'incomplete', 'pending_approval', 'pending') DEFAULT 'pending'");
     }
 
     /**

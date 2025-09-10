@@ -97,11 +97,31 @@ class User extends Authenticatable
     
     public function isSubscriptionExpired()
     {
+        // Los usuarios en proceso de registro/verificación no se consideran vencidos
+        if (in_array($this->subscription_status, ['pending', 'pending_approval'])) {
+            return false;
+        }
+        
+        // Los usuarios que nunca han tenido una suscripción activa no se consideran vencidos
+        if (!$this->subscription_expires_at && !$this->last_payment_date) {
+            return false;
+        }
+        
         return !$this->subscription_expires_at || $this->subscription_expires_at < now();
     }
     
     public function isSubscriptionExpiringSoon($days = 5)
     {
+        // Los usuarios en proceso de registro/verificación no muestran advertencias de vencimiento
+        if (in_array($this->subscription_status, ['pending', 'pending_approval'])) {
+            return false;
+        }
+        
+        // Los usuarios que nunca han tenido una suscripción activa no muestran advertencias
+        if (!$this->subscription_expires_at && !$this->last_payment_date) {
+            return false;
+        }
+        
         if (!$this->subscription_expires_at) {
             return false;
         }

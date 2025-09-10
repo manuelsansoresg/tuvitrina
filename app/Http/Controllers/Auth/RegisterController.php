@@ -102,7 +102,7 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'selected_plan' => $data['selected_plan'],
             'subscription_expires_at' => null,
-            'subscription_status' => 'incomplete', // Estado inicial hasta completar registro
+            'subscription_status' => 'pending', // Estado inicial hasta completar registro
             'last_payment_date' => null,
         ]);
         
