@@ -14,7 +14,7 @@ class AddSelectedPlanToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('selected_plan', ['monthly', 'annual'])->nullable()->after('password');
+            $table->enum('selected_plan', ['monthly', 'annual', 'yearly'])->nullable()->after('password');
         });
     }
 
