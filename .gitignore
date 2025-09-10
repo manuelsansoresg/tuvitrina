@@ -5,6 +5,7 @@
 /public/images/products/*
 !/public/images/products/.gitkeep
 /public/payment-proofs/*
+/public/payment_proofs/*
 !/public/payment-proofs/.gitkeep
 /storage/*.key
 /vendor
