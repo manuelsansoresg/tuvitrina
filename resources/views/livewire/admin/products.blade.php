@@ -229,7 +229,7 @@
                             <label>Vista previa:</label>
                             <div class="preview-grid">
                                 @foreach($images as $index => $image)
-                                    <div class="preview-item" wire:key="preview-{{ $index }}-{{ md5(serialize($images)) }}">
+                                    <div class="preview-item" wire:key="preview-{{ $index }}-{{ now()->timestamp }}">
                                         @if(is_string($image))
                                             <!-- Existing image -->
                                             <img src="{{ asset($image) }}" alt="Preview">

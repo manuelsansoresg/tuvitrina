@@ -159,10 +159,13 @@ class Products extends Component
                         mkdir($destinationPath, 0755, true);
                     }
                     
-                    // Move the uploaded file directly to public
-                    $image->move($destinationPath, $filename);
+                    // Save file directly to public directory
+                    $tempPath = $image->getRealPath();
+                    $finalPath = $destinationPath . DIRECTORY_SEPARATOR . $filename;
                     
-                    $imagePaths[] = 'images/products/' . $filename;
+                    if (copy($tempPath, $finalPath)) {
+                        $imagePaths[] = 'images/products/' . $filename;
+                    }
                     $newImagesUploaded = true;
                 }
             }
@@ -275,6 +278,7 @@ class Products extends Component
                     $q->where('id', $this->businessFilter);
                 });
             }
+            // Si businessFilter es 'all', no aplicar ningún filtro adicional
         } elseif ($user->hasRole('admin')) {
             // Los admin solo ven productos de su empresa
             $query->where('user_id', $user->id);
