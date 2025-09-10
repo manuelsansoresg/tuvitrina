@@ -133,7 +133,7 @@
                             <div class="border-bottom pb-2 mb-2">
                                 <div class="d-flex justify-content-between">
                                     <small class="text-muted">{{ $payment->created_at->format('d/m/Y') }}</small>
-                                    <span class="badge bg-{{ $payment->status === 'completed' ? 'success' : ($payment->status === 'pending' ? 'warning' : 'danger') }}">
+                                    <span class="badge bg-{{ $payment->status === 'completed' ? 'success' : ($payment->status === 'pending' ? 'warning' : ($payment->status === 'incomplete' ? 'info' : 'danger')) }}">
                                         {{ $payment->status_label }}
                                     </span>
                                 </div>

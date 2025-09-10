@@ -27,8 +27,8 @@ class SubscriptionPaymentController extends Controller
     
     public function approve(SubscriptionPayment $payment)
     {
-        if ($payment->status !== 'pending') {
-            return back()->with('error', 'Solo se pueden aprobar pagos pendientes.');
+        if ($payment->status !== 'pending' && $payment->status !== 'incomplete') {
+            return back()->with('error', 'Solo se pueden aprobar pagos pendientes o incompletos.');
         }
         
         $user = $payment->user;

@@ -13,6 +13,7 @@ class SubscriptionPayments extends Component
     public $selectedPayment = null;
     public $adminNotes = '';
     public $showModal = false;
+    public $statusFilter = 'all';
 
     public function selectPayment($paymentId)
     {
@@ -80,7 +81,7 @@ class SubscriptionPayments extends Component
         $payment = SubscriptionPayment::findOrFail($paymentId);
         
         $payment->update([
-            'status' => 'rejected',
+            'status' => 'failed',
             'admin_notes' => $this->adminNotes,
         ]);
         
@@ -90,20 +91,16 @@ class SubscriptionPayments extends Component
 
     public function render()
     {
-        $pendingPayments = SubscriptionPayment::with('user')
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        $recentPayments = SubscriptionPayment::with('user')
-            ->whereIn('status', ['approved', 'rejected'])
-            ->orderBy('updated_at', 'desc')
-            ->limit(10)
-            ->get();
+        $query = SubscriptionPayment::with('user');
+        
+        if ($this->statusFilter !== 'all') {
+            $query->where('status', $this->statusFilter);
+        }
+        
+        $payments = $query->orderBy('created_at', 'desc')->get();
 
         return view('livewire.admin.subscription-payments', [
-            'pendingPayments' => $pendingPayments,
-            'recentPayments' => $recentPayments,
+            'payments' => $payments,
         ])->layout('layouts.admin');
     }
 }

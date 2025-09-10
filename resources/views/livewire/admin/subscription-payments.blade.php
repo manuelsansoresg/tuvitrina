@@ -5,8 +5,10 @@
             <select wire:model="statusFilter" class="form-select form-select-sm" style="width: auto;">
                 <option value="all">Todos los estados</option>
                 <option value="pending">Pendientes</option>
-                <option value="approved">Aprobados</option>
-                <option value="rejected">Rechazados</option>
+                <option value="completed">Completados</option>
+                <option value="failed">Fallidos</option>
+                <option value="refunded">Reembolsados</option>
+                <option value="incomplete">Incompletos</option>
             </select>
         </div>
     </div>
@@ -51,13 +53,9 @@
                                     <td>${{ number_format($payment->amount, 2) }}</td>
                                     <td>{{ $payment->payment_date->format('d/m/Y H:i') }}</td>
                                     <td>
-                                        @if($payment->status === 'pending')
-                                            <span class="badge bg-warning">Pendiente</span>
-                                        @elseif($payment->status === 'approved')
-                                            <span class="badge bg-success">Aprobado</span>
-                                        @else
-                                            <span class="badge bg-danger">Rechazado</span>
-                                        @endif
+                                        <span class="badge bg-{{ $payment->status === 'completed' ? 'success' : ($payment->status === 'pending' ? 'warning' : 'danger') }}">
+                                            {{ $payment->status_label }}
+                                        </span>
                                     </td>
                                     <td>
                                         @if($payment->payment_proof_path)
@@ -70,7 +68,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($payment->status === 'pending')
+                                        @if($payment->status === 'pending' || $payment->status === 'incomplete')
                                             <div class="btn-group" role="group">
                                                 <button type="button" 
                                                         wire:click="approvePayment({{ $payment->id }})" 
@@ -95,9 +93,7 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    {{ $payments->links() }}
-                </div>
+
             @else
                 <div class="text-center py-4">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>

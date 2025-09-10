@@ -79,6 +79,7 @@ class SubscriptionPayment extends Model
             'completed' => 'Completado',
             'failed' => 'Fallido',
             'refunded' => 'Reembolsado',
+            'incomplete' => 'Incompleto',
         ];
         
         return $labels[$this->status] ?? $this->status;
