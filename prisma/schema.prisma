@@ -11,11 +11,19 @@ enum Role {
   ADMIN
 }
 
+enum PlanType {
+  EXPRESS
+  EMPRENDEDOR
+  PREMIUM
+}
+
 model User {
   id              String         @id @default(cuid())
   email           String         @unique
+  name            String?
   password        String
   role            Role           @default(USER)
+  plan            PlanType       @default(EXPRESS)
   subscriptionEnd DateTime?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
