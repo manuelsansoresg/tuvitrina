@@ -39,6 +39,7 @@ model BusinessCard {
   title       String
   description String?
   themeColor  String?  @default("#000000")
+  location    String?  // Google Maps Embed URL or coordinates
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -48,6 +49,7 @@ model BusinessCard {
   
   links       Link[]
   gallery     GalleryImage[]
+  products    Product[]
 }
 
 model Link {
@@ -68,6 +70,18 @@ model GalleryImage {
   
   cardId    String
   card      BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  price       Float?
+  imageUrl    String?
+  order       Int          @default(0)
+  
+  cardId      String
+  card        BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
