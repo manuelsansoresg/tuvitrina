@@ -10,9 +10,7 @@ const RegisterSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  plan: z.nativeEnum(PlanType, {
-    errorMap: () => ({ message: "Por favor selecciona un plan válido" }),
-  }),
+  plan: z.nativeEnum(PlanType),
 });
 
 export async function register(prevState: any, formData: FormData) {
