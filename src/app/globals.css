@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  
+  /* Paleta Específica */
+  --slate-900: #0F172A;
+  --slate-800: #1E293B;
+  --slate-700: #334155;
+  --slate-50: #F8FAFC;
+  
+  --primary-start: #3B82F6;
+  --primary-end: #2563EB;
+  --whatsapp: #22C55E;
+  
+  --secondary: #D4AF37; /* Mantener Dorado para detalles Premium */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-slate-900: var(--slate-900);
+  --color-slate-800: var(--slate-800);
+  --color-slate-700: var(--slate-700);
+  --color-slate-50: var(--slate-50);
+  --color-primary-start: var(--primary-start);
+  --color-primary-end: var(--primary-end);
+  --color-whatsapp: var(--whatsapp);
+  --color-secondary: var(--secondary);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0F172A;
+    --foreground: #F8FAFC;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
