@@ -4,28 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { PlanType } from "@prisma/client";
-
-// Define limits per plan
-export const PLAN_LIMITS = {
-  EXPRESS: {
-    galleryImages: 0,
-    allowLocation: false,
-    allowThemeColor: false,
-    allowProducts: false,
-  },
-  EMPRENDEDOR: {
-    galleryImages: 5,
-    allowLocation: true,
-    allowThemeColor: true,
-    allowProducts: false,
-  },
-  PREMIUM: {
-    galleryImages: 12,
-    allowLocation: true,
-    allowThemeColor: true,
-    allowProducts: true,
-  },
-};
+import { PLAN_LIMITS } from "@/lib/constants";
 
 export async function updateBusinessCard(prevState: any, formData: FormData) {
   const session = await auth();

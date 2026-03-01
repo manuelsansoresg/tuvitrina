@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { User, BusinessCard, Link as LinkModel, GalleryImage, Product, PlanType } from "@prisma/client";
-import { PLAN_LIMITS } from "@/actions/dashboard";
+import { PLAN_LIMITS } from "@/lib/constants";
 import { useFormStatus } from "react-dom";
 import { updateBusinessCard } from "@/actions/dashboard";
 import { useActionState } from "react";
