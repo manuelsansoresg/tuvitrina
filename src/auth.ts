@@ -13,6 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
+        console.log("Authorize attempt for:", credentials?.email);
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
@@ -20,11 +21,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
           const user = await prisma.user.findUnique({ where: { email } });
-          if (!user) return null;
+          
+          if (!user) {
+            console.log("User not found");
+            return null;
+          }
           
           const passwordsMatch = await bcrypt.compare(password, user.password);
 
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            console.log("Password matched, user authenticated");
+            return user;
+          } else {
+            console.log("Invalid password");
+          }
+        } else {
+          console.log("Invalid credentials format");
         }
         return null;
       },

@@ -10,6 +10,12 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
       
+      console.log("Middleware check:", { 
+        path: nextUrl.pathname, 
+        isLoggedIn, 
+        userId: auth?.user?.id 
+      });
+
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
