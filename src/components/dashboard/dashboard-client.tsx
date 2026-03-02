@@ -345,6 +345,9 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                formData.append("iconColor", previewData.iconColor || "");
                formData.append("galleryTitleColor", previewData.galleryTitleColor || "");
                formData.append("galleryPriceColor", previewData.galleryPriceColor || "");
+               formData.append("linkTextColor", previewData.linkTextColor || "");
+               formData.append("linkBackgroundColor", previewData.linkBackgroundColor || "");
+               formData.append("linkBorderColor", previewData.linkBorderColor || "");
             }
 
             const result = await updateBusinessCard(null, formData);
@@ -766,6 +769,41 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                               label="Color de Precios" 
                               value={previewData?.galleryPriceColor || "#4ade80"} 
                               onChange={(val) => handlePreviewChange("galleryPriceColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div className="border-t border-slate-800"></div>
+
+                  {/* Link Style Section */}
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                     <Label className="text-slate-300">Estilo de Enlaces</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Texto" 
+                              value={previewData?.linkTextColor || "#0f172a"} 
+                              onChange={(val) => handlePreviewChange("linkTextColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Fondo" 
+                              value={previewData?.linkBackgroundColor || "#ffffff"} 
+                              onChange={(val) => handlePreviewChange("linkBackgroundColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Borde" 
+                              value={previewData?.linkBorderColor || "#e2e8f0"} 
+                              onChange={(val) => handlePreviewChange("linkBorderColor", val)} 
                               disabled={!limits.allowThemeColor}
                             />
                         </div>

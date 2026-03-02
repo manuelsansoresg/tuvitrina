@@ -74,6 +74,9 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const iconColor = formData.get("iconColor") as string;
   const galleryTitleColor = formData.get("galleryTitleColor") as string;
   const galleryPriceColor = formData.get("galleryPriceColor") as string;
+  const linkTextColor = formData.get("linkTextColor") as string;
+  const linkBackgroundColor = formData.get("linkBackgroundColor") as string;
+  const linkBorderColor = formData.get("linkBorderColor") as string;
 
   // Validate theme color update based on plan
   const finalThemeColor = limits.allowThemeColor ? themeColor : user.businessCard.themeColor;
@@ -89,6 +92,9 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const finalIconColor = canCustomizeColors ? iconColor : user.businessCard.iconColor;
   const finalGalleryTitleColor = canCustomizeColors ? galleryTitleColor : user.businessCard.galleryTitleColor;
   const finalGalleryPriceColor = canCustomizeColors ? galleryPriceColor : user.businessCard.galleryPriceColor;
+  const finalLinkTextColor = canCustomizeColors ? linkTextColor : user.businessCard.linkTextColor;
+  const finalLinkBackgroundColor = canCustomizeColors ? linkBackgroundColor : user.businessCard.linkBackgroundColor;
+  const finalLinkBorderColor = canCustomizeColors ? linkBorderColor : user.businessCard.linkBorderColor;
 
   // Validate location update based on plan
   const finalLocation = limits.allowLocation ? location : user.businessCard.location;
@@ -113,6 +119,9 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
           iconColor: finalIconColor,
           galleryTitleColor: finalGalleryTitleColor,
           galleryPriceColor: finalGalleryPriceColor,
+          linkTextColor: finalLinkTextColor,
+          linkBackgroundColor: finalLinkBackgroundColor,
+          linkBorderColor: finalLinkBorderColor,
         },
       });
 

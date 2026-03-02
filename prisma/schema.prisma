@@ -54,6 +54,9 @@ model BusinessCard {
   iconColor           String? // Custom icon color, null = brand colors
   galleryTitleColor   String? @default("#ffffff") // Default white for gallery overlay
   galleryPriceColor   String? @default("#4ade80") // Default green-400 for gallery overlay
+  linkTextColor       String? @default("#0f172a") // Text color for links
+  linkBackgroundColor String? @default("#ffffff") // Background color for links
+  linkBorderColor     String? @default("#e2e8f0") // Border color for links
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
