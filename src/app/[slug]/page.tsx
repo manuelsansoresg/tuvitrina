@@ -5,10 +5,47 @@ import { checkSubscriptionStatus } from "@/actions/subscription"
 import { GalleryViewer } from "@/components/gallery-viewer";
 import { QRCodeCard } from "@/components/QRCodeCard";
 import { headers } from "next/headers";
+import { Metadata } from "next";
 import { 
   Link as LinkIcon, Facebook, Instagram, Twitter, Linkedin, 
   Youtube, MessageCircle, Mail, Phone, Globe, MapPin 
 } from "lucide-react";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  
+  const card = await prisma.businessCard.findUnique({
+    where: { slug },
+  })
+
+  if (!card) {
+    return {
+      title: "Tarjeta No Encontrada",
+      description: "La tarjeta digital que buscas no está disponible.",
+    }
+  }
+
+  // Cast to any to access extended properties if needed
+  const extendedCard = card as any;
+
+  return {
+    title: `${extendedCard.title} | Tarjeta de Presentación Digital`,
+    description: `Conoce el espacio profesional de ${extendedCard.title}. Conecta, visualiza sus productos y obtén sus datos de contacto aquí.`,
+    keywords: [
+        "tarjeta digital", 
+        "business card", 
+        extendedCard.title, 
+        "perfil profesional", 
+        "contacto",
+        ...(extendedCard.description ? extendedCard.description.split(' ').slice(0, 5) : [])
+    ],
+    openGraph: {
+      title: `${extendedCard.title} | Tarjeta de Presentación Digital`,
+      description: `Conoce el espacio profesional de ${extendedCard.title}. Conecta, visualiza sus productos y obtén sus datos de contacto aquí.`,
+      // images: [] // We will let opengraph-image.tsx handle this automatically
+    }
+  }
+}
 
 export default async function CardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -64,8 +101,22 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
       link: LinkIcon
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": extendedCard.title,
+    "description": extendedCard.description,
+    "url": fullUrl,
+    "image": extendedCard.logoUrl ? [extendedCard.logoUrl] : [],
+    "sameAs": extendedCard.links.map((link: any) => link.url)
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div 
         className="w-full max-w-md min-h-screen shadow-2xl overflow-hidden relative flex flex-col"
         style={{

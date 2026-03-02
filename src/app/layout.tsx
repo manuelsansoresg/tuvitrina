@@ -13,8 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tarjetas Digitales Empresariales - Tu Presentación Profesional",
-  description: "Lleva tu negocio al siguiente nivel con una tarjeta digital profesional, ecológica y lista para compartir por WhatsApp.",
+  title: "TuVitrina | Tarjetas Digitales y Perfiles de Negocio Profesional",
+  description: "Crea tu tarjeta de presentación digital y potencia tu identidad profesional. Tu espacio digital para emprendedores con vcard inteligente.",
+  keywords: [
+    "tarjeta de presentación digital",
+    "tarjeta digital",
+    "perfil de negocio profesional",
+    "vcard inteligente",
+    "espacio digital para emprendedores"
+  ],
 };
 
 export default function RootLayout({
