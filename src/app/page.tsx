@@ -8,11 +8,14 @@ import { Features } from "@/components/Features";
 import { Pricing } from "@/components/Pricing";
 import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
+import { auth } from "@/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <main className="min-h-screen bg-background text-white selection:bg-primary-start/30">
-      <Navbar />
+      <Navbar user={session?.user} />
       <ScarcityBanner />
       <Hero />
       <SocialProof />

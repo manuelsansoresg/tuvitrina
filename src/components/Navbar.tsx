@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
-export function Navbar() {
+export function Navbar({ user }: { user?: any }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -20,14 +20,29 @@ export function Navbar() {
           <a href="#features" className="hover:text-white transition-colors">Beneficios</a>
           <a href="#pricing" className="hover:text-white transition-colors">Precios</a>
           <a href="#faq" className="hover:text-white transition-colors">Preguntas</a>
-          <motion.a
-            href="#pricing"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white font-bold shadow-lg shadow-blue-500/20"
-          >
-            Empezar
-          </motion.a>
+          
+          {user ? (
+            <motion.a
+              href="/dashboard"
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2"
+            >
+              Ir al Panel
+            </motion.a>
+          ) : (
+            <div className="flex items-center gap-4">
+              <a href="/login" className="hover:text-white transition-colors">Entrar</a>
+              <motion.a
+                href="#pricing"
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white font-bold shadow-lg shadow-blue-500/20"
+              >
+                Empezar
+              </motion.a>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -49,9 +64,19 @@ export function Navbar() {
           <a href="#features" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Beneficios</a>
           <a href="#pricing" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Precios</a>
           <a href="#faq" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Preguntas</a>
-          <a href="#pricing" onClick={() => setIsOpen(false)} className="text-center px-4 py-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white font-bold">
-            Empezar
-          </a>
+          
+          {user ? (
+            <a href="/dashboard" onClick={() => setIsOpen(false)} className="text-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold">
+              Ir al Panel
+            </a>
+          ) : (
+            <>
+              <a href="/login" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white text-center">Entrar</a>
+              <a href="#pricing" onClick={() => setIsOpen(false)} className="text-center px-4 py-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white font-bold">
+                Empezar
+              </a>
+            </>
+          )}
         </motion.div>
       )}
     </nav>
