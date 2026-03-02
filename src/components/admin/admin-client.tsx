@@ -175,6 +175,13 @@ function UsersPanel({
                 </Button>
             </div>
 
+            {users.length <= 1 && (
+              <div className="p-4 bg-blue-900/20 text-blue-200 rounded-md border border-blue-800 flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                <p>Solo estás tú en el sistema. ¡Crea un nuevo usuario para probar las funciones de gestión!</p>
+              </div>
+            )}
+
             {/* Create User Modal */}
             <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Crear Nuevo Usuario">
                 <form action={createUserDispatch} className="space-y-4">
@@ -363,7 +370,7 @@ function UsersPanel({
 function FinancesPanel({ stats }: any) {
     if (!stats) return <p className="text-slate-400">Cargando estadísticas...</p>;
 
-    // Mock data for the chart since we don't have historical data yet
+    // Datos simulados para el gráfico ya que aún no tenemos datos históricos
     const monthlyData = [
         { month: 'Ene', amount: stats.totalEarnings * 0.1 },
         { month: 'Feb', amount: stats.totalEarnings * 0.15 },

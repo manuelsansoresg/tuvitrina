@@ -13,6 +13,7 @@ const SUPER_ADMIN_EMAIL = "manuelsansoresg@gmail.com";
 
 export async function getAdminStats() {
   const session = await auth();
+  console.log("getAdminStats session:", JSON.stringify(session, null, 2));
   if (session?.user?.role !== Role.ADMIN) return null;
 
   const totalUsers = await prisma.user.count();
@@ -45,6 +46,7 @@ export async function getAdminStats() {
 
 export async function getAdminUsers() {
   const session = await auth();
+  console.log("getAdminUsers session:", JSON.stringify(session, null, 2));
   if (session?.user?.role !== Role.ADMIN) return [];
 
   return await prisma.user.findMany({
