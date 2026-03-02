@@ -8,6 +8,7 @@ import { Features } from "@/components/Features";
 import { Pricing } from "@/components/Pricing";
 import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { auth } from "@/auth";
 
 export default async function Home() {
@@ -25,6 +26,7 @@ export default async function Home() {
       <Pricing />
       <FAQ />
       <Footer />
+      <WhatsAppButton />
     </main>
   );
 }
