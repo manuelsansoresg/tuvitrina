@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, Plus, Trash, GripVertical, Image as ImageIcon, 
   MapPin, Link as LinkIcon, Save, Eye, Smartphone, 
-  LayoutTemplate, Palette, Lock, Upload, Check, Copy, X
+  LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft
 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +40,7 @@ interface DashboardClientProps {
       name: string | null;
       email: string | null;
       plan: PlanType;
+      role?: Role;
       businessCard: ExtendedBusinessCard | null;
     };
     limits?: typeof PLAN_LIMITS.EXPRESS;
@@ -74,6 +75,7 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
 
   const currentPlan = data.user.plan as PlanType; // Ensure type safety
   const limits = data.limits || PLAN_LIMITS[currentPlan] || PLAN_LIMITS.EXPRESS;
+  const isAdmin = data.user.role === Role.ADMIN;
 
   const handlePreviewChange = (field: string, value: any) => {
     setPreviewData(prev => prev ? ({ ...prev, [field]: value }) : null);

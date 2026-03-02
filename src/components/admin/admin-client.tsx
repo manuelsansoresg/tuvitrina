@@ -109,7 +109,7 @@ export default function AdminClient({ initialUsers, stats, currentUserEmail }: A
         <div className="flex gap-2">
             <Button 
                 variant="outline"
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => window.location.href = '/dashboard?view=card'}
                 className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-blue-400"
                 title="Ir a mi Tarjeta"
             >
