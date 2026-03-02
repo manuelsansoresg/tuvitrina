@@ -205,7 +205,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
          
          {/* Footer */}
          <div className="py-6 text-center border-t border-white/10" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
-            <p className="text-[10px] font-medium" style={{ color: extendedCard.descriptionColor || '#94a3b8' }}> <a href="https://www.facebook.com/profile.php?id=100068794671008" target="_blank">XpertSystems</a> </p>
+            <p className="text-[10px] font-medium" style={{ color: extendedCard.descriptionColor || '#94a3b8' }}> 2025 TuVitrina. Todos los derechos reservados. | Desarrollado por  <a href="https://www.facebook.com/profile.php?id=100068794671008" target="_blank">XpertSystems</a> </p>
          </div>
       </div>
     </div>
