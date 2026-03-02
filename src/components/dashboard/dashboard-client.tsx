@@ -975,7 +975,7 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
              
              {/* Powered by footer */}
              <div className="py-6 text-center">
-                <p className="text-[10px] text-slate-400 font-medium">Powered by TuVitrina</p>
+                <p className="text-[10px] text-slate-400 font-medium"> <a href="https://www.facebook.com/profile.php?id=100068794671008" target="_blank">XpertSystems</a> </p>
              </div>
           </div>
         </div>
