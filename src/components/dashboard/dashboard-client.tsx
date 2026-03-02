@@ -60,6 +60,8 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
 
   const limits = data.limits;
   const plan = data.user.plan;
+  const isAdmin = data.user.role === 'ADMIN';
+  const isPremiumOrAdmin = plan === 'PREMIUM' || isAdmin;
   const cardUrl = typeof window !== 'undefined' ? `${window.location.origin}/${previewData?.slug}` : `tuvitrina.xyz/${previewData?.slug}`;
 
   return (
@@ -71,9 +73,11 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
               <h1 className="text-2xl font-bold text-white">Panel de Control</h1>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-slate-400">
-                  Plan: <span className={`font-bold ${plan === 'PREMIUM' ? 'text-amber-400' : plan === 'EMPRENDEDOR' ? 'text-blue-400' : 'text-slate-400'}`}>{plan}</span>
+                  Plan: <span className={`font-bold ${isPremiumOrAdmin ? 'text-amber-400' : plan === 'EMPRENDEDOR' ? 'text-blue-400' : 'text-slate-400'}`}>
+                    {isAdmin ? 'ADMIN (Ilimitado)' : plan}
+                  </span>
                 </p>
-                {plan === 'PREMIUM' && (
+                {isPremiumOrAdmin && (
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                     <Crown size={10} /> Soporte VIP
                   </span>

@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { PlanType } from "@prisma/client";
+import { PlanType, Role } from "@prisma/client";
 import { PLAN_LIMITS } from "@/lib/constants";
 
 export async function updateBusinessCard(prevState: any, formData: FormData) {
@@ -21,7 +21,9 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
     return { message: "Usuario o tarjeta no encontrados" };
   }
 
-  const limits = PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS;
+  const limits = (user.role === Role.ADMIN) 
+    ? PLAN_LIMITS.PREMIUM 
+    : (PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS);
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -78,6 +80,8 @@ export async function getDashboardData() {
 
   return {
     user,
-    limits: PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS,
+    limits: (user.role === Role.ADMIN) 
+      ? PLAN_LIMITS.PREMIUM 
+      : (PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS),
   };
 }
