@@ -128,6 +128,8 @@ export async function updateSocialLinks(prevState: any, formData: FormData) {
     return { message: "Usuario o tarjeta no encontrados" };
   }
 
+  const cardId = user.businessCard.id;
+
   try {
     const linksJson = formData.get("links") as string;
     const links = JSON.parse(linksJson);
@@ -135,10 +137,10 @@ export async function updateSocialLinks(prevState: any, formData: FormData) {
     // Delete existing links and create new ones (simplest approach for full sync)
     // Alternatively, update/create/delete based on ID, but full sync is safer for order
     await prisma.$transaction([
-      prisma.link.deleteMany({ where: { cardId: user.businessCard.id } }),
+      prisma.link.deleteMany({ where: { cardId } }),
       prisma.link.createMany({
         data: links.map((link: any, index: number) => ({
-          cardId: user.businessCard.id,
+          cardId,
           icon: link.icon,
           label: link.label,
           url: link.url,
