@@ -11,6 +11,11 @@ export function Pricing() {
       const price = parseFloat(priceString.replace('$', '').replace(',', ''));
       const result = await createSubscriptionPreference(planName, price);
       
+      if (result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
       if (result.init_point) {
         window.location.href = result.init_point;
       } else if (result.error) {

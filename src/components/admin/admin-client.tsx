@@ -327,31 +327,31 @@ function UsersPanel({
                                     </Badge>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2">
+                                    <div className="flex justify-end gap-3">
                                         <Button 
                                             size="sm" 
-                                            variant="ghost" 
-                                            className="h-9 w-9 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+                                            variant="outline" 
+                                            className="h-10 w-10 p-0 border-slate-700 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-600 transition-all"
                                             title="Editar Usuario"
                                             onClick={() => handleEditUser(user)}
                                         >
-                                            <Settings className="h-5 w-5" />
+                                            <Settings className="h-6 w-6" />
                                         </Button>
 
                                         <Button 
                                             size="sm" 
-                                            variant="ghost" 
-                                            className="h-9 w-9 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                                            variant="outline" 
+                                            className="h-10 w-10 p-0 border-blue-900/30 bg-blue-900/10 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 hover:border-blue-800 transition-all"
                                             title="Editar Tarjeta"
                                             onClick={() => router.push(`/admin/users/${user.id}/card`)}
                                         >
-                                            <Edit className="h-5 w-5" />
+                                            <Edit className="h-6 w-6" />
                                         </Button>
                                         
                                         <Button 
                                             size="sm" 
-                                            variant="ghost" 
-                                            className={`h-9 w-9 p-0 ${user.active ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'} hover:bg-slate-800`}
+                                            variant="outline" 
+                                            className={`h-10 w-10 p-0 border-slate-700 bg-slate-900 hover:bg-slate-800 hover:border-slate-600 transition-all ${user.active ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'}`}
                                             title={user.active ? "Desactivar" : "Activar"}
                                             onClick={async () => {
                                                 if (confirm(`¿${user.active ? 'Desactivar' : 'Activar'} usuario?`)) {
@@ -360,13 +360,13 @@ function UsersPanel({
                                             }}
                                             disabled={user.email === superAdminEmail}
                                         >
-                                            {user.active ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            {user.active ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                                         </Button>
 
                                         <Button 
                                             size="sm" 
-                                            variant="ghost" 
-                                            className="h-9 w-9 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                                            variant="outline" 
+                                            className="h-10 w-10 p-0 border-red-900/30 bg-red-900/10 text-red-400 hover:text-red-300 hover:bg-red-900/20 hover:border-red-800 transition-all"
                                             title="Eliminar Usuario"
                                             onClick={async () => {
                                                 if (confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) {
@@ -375,7 +375,7 @@ function UsersPanel({
                                             }}
                                             disabled={user.email === superAdminEmail}
                                         >
-                                            <Trash className="h-5 w-5" />
+                                            <Trash className="h-6 w-6" />
                                         </Button>
                                     </div>
                                 </td>

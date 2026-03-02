@@ -12,7 +12,7 @@ export async function createSubscriptionPreference(planName: string, price: numb
   const session = await auth();
   
   if (!session?.user?.id) {
-    redirect("/login");
+    return { redirectUrl: "/login?callbackUrl=/dashboard" }; // Return redirect URL instead of throwing
   }
 
   const preference = new Preference(client);
