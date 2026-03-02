@@ -43,7 +43,7 @@ type DashboardData = {
   limits: typeof PLAN_LIMITS.EXPRESS;
 };
 
-export default function DashboardClient({ data }: { data: DashboardData }) {
+export default function DashboardClient({ data, targetUserId }: { data: DashboardData, targetUserId?: string }) {
   const [activeTab, setActiveTab] = useState("general");
   const [previewData, setPreviewData] = useState(data.user.businessCard);
   const [showQR, setShowQR] = useState(false);
@@ -70,7 +70,9 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
       <div className="w-full lg:w-1/2 flex flex-col border-r border-slate-800 overflow-y-auto custom-scrollbar">
         <header className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Panel de Control</h1>
+              <h1 className="text-2xl font-bold text-white">
+                {targetUserId ? `Editando: ${data.user.name || 'Usuario'}` : 'Panel de Control'}
+              </h1>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-slate-400">
                   Plan: <span className={`font-bold ${isPremiumOrAdmin ? 'text-amber-400' : plan === 'EMPRENDEDOR' ? 'text-blue-400' : 'text-slate-400'}`}>
@@ -81,6 +83,11 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                     <Crown size={10} /> Soporte VIP
                   </span>
+                )}
+                {targetUserId && (
+                    <Button variant="outline" size="sm" onClick={() => window.location.href = '/admin'} className="ml-4 text-xs h-6">
+                        Volver al Admin
+                    </Button>
                 )}
               </div>
             </div>
@@ -98,6 +105,7 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
                 
                 <form action={dispatch}>
                   {/* Hidden inputs to pass data to server action */}
+                  {targetUserId && <input type="hidden" name="targetUserId" value={targetUserId} />}
                   <input type="hidden" name="title" value={previewData?.title || ""} />
                   <input type="hidden" name="description" value={previewData?.description || ""} />
                   <input type="hidden" name="themeColor" value={previewData?.themeColor || "#000000"} />

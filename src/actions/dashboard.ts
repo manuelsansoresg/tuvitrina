@@ -12,8 +12,21 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
     return { message: "No autenticado" };
   }
 
+  // Check if targetUserId is provided (Admin override)
+  const targetUserId = formData.get("targetUserId") as string;
+  const isSelf = !targetUserId || targetUserId === session.user.id;
+  
+  if (!isSelf && session.user.role !== Role.ADMIN) {
+     return { message: "No autorizado para editar esta tarjeta" };
+  }
+
+  const userIdToUpdate = isSelf ? session.user.id : targetUserId;
+
+  // If editing self, we can use email for safety, but if admin editing other, use ID
+  const whereClause = isSelf ? { email: session.user.email } : { id: userIdToUpdate };
+
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: whereClause as any, // TS might complain about OneOf, casting to any for simplicity or specific type
     include: { businessCard: true },
   });
 
@@ -21,7 +34,15 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
     return { message: "Usuario o tarjeta no encontrados" };
   }
 
-  const limits = (user.role === Role.ADMIN) 
+  // Admin always gets PREMIUM limits regardless of whose card they are editing?
+  // User asked: "que pueda editar la tarjeta de cualquier usuario"
+  // If Admin edits a User's card, should they be bound by User's limits or Admin's power?
+  // Usually Admin has god-mode. Let's use Admin Role to determine limits application.
+  
+  // If the EDITOR is Admin, use Premium limits.
+  const isEditorAdmin = session.user.role === Role.ADMIN;
+
+  const limits = isEditorAdmin 
     ? PLAN_LIMITS.PREMIUM 
     : (PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS);
 
