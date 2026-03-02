@@ -8,7 +8,7 @@ import { updateBusinessCard } from "@/actions/dashboard";
 import { logout } from "@/actions/auth";
 import { useActionState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown, LogOut, LayoutDashboard, PartyPopper, AlertCircle } from "lucide-react";
+import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown, LogOut, LayoutDashboard, PartyPopper, AlertCircle, Upload, Plus, Trash, ExternalLink, Copy, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 // --- Custom UI Components (Replaces shadcn/ui for simplicity/portability in this env) ---
@@ -21,13 +21,18 @@ const Button = ({ className, variant, size, ...props }: any) => {
   const variants = {
     default: "bg-blue-600 text-slate-50 hover:bg-blue-600/90",
     outline: "border border-slate-800 bg-slate-950 hover:bg-slate-800 hover:text-slate-50",
+    destructive: "bg-red-900/30 text-red-400 hover:bg-red-900/40",
+    ghost: "hover:bg-slate-800 hover:text-slate-50",
   };
   const sizes = {
     default: "h-10 px-4 py-2",
     sm: "h-9 rounded-md px-3",
+    icon: "h-10 w-10",
   };
-  const variantStyles = variants[variant as keyof typeof variants] || variants.default;
-  const sizeStyles = sizes[size as keyof typeof sizes] || sizes.default;
+  // @ts-ignore
+  const variantStyles = variants[variant] || variants.default;
+  // @ts-ignore
+  const sizeStyles = sizes[size] || sizes.default;
   
   return <button className={`${baseStyles} ${variantStyles} ${sizeStyles} ${className}`} {...props} />;
 };
@@ -48,9 +53,11 @@ type DashboardData = {
 export default function DashboardClient({ data, targetUserId }: { data: DashboardData, targetUserId?: string }) {
   const [activeTab, setActiveTab] = useState("general");
   const [previewData, setPreviewData] = useState(data.user.businessCard);
+  const [links, setLinks] = useState<any[]>(data.user.businessCard?.links || []);
   const [showQR, setShowQR] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [state, dispatch] = useActionState(updateBusinessCard, null);
+  const [copied, setCopied] = useState(false);
   
   const searchParams = useSearchParams();
   const paymentStatus = searchParams.get("payment");
@@ -68,6 +75,40 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handlePreviewChange("logoUrl", reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCopySlug = () => {
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/${previewData?.slug}` : `tuvitrina.xyz/${previewData?.slug}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const addLink = () => {
+    setLinks([...links, { icon: "Link", label: "", url: "", order: links.length }]);
+  };
+
+  const removeLink = (index: number) => {
+    const newLinks = [...links];
+    newLinks.splice(index, 1);
+    setLinks(newLinks);
+  };
+
+  const updateLink = (index: number, field: string, value: string) => {
+    const newLinks = [...links];
+    newLinks[index] = { ...newLinks[index], [field]: value };
+    setLinks(newLinks);
   };
 
   const limits = data.limits;
@@ -158,6 +199,8 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                   <input type="hidden" name="themeColor" value={previewData?.themeColor || "#000000"} />
                   <input type="hidden" name="location" value={previewData?.location || ""} />
                   <input type="hidden" name="slug" value={previewData?.slug || ""} />
+                  <input type="hidden" name="logoUrl" value={previewData?.logoUrl || ""} />
+                  <input type="hidden" name="links" value={JSON.stringify(links)} />
                   
                   <SaveButton />
                 </form>
@@ -176,10 +219,12 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
            <div className="m-6 p-6 bg-white rounded-xl flex flex-col items-center justify-center text-slate-900 animate-in fade-in zoom-in duration-300 relative">
               <button onClick={() => setShowQR(false)} className="absolute top-2 right-2 text-slate-400 hover:text-slate-600">✕</button>
               <h3 className="font-bold mb-4">Tu Código QR</h3>
-              <QRCodeSVG value={cardUrl} size={200} />
+              <div id="qr-code-wrapper" className="bg-white p-2">
+                <QRCodeSVG value={cardUrl} size={200} />
+              </div>
               <p className="mt-4 text-sm text-slate-500 font-mono bg-slate-100 px-2 py-1 rounded">{cardUrl}</p>
               <Button size="sm" className="mt-4" onClick={() => {
-                  const svg = document.querySelector('svg');
+                  const svg = document.querySelector('#qr-code-wrapper svg');
                   if (svg) {
                     const svgData = new XMLSerializer().serializeToString(svg);
                     const canvas = document.createElement("canvas");
@@ -196,6 +241,8 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                       downloadLink.click();
                     };
                     img.src = "data:image/svg+xml;base64," + btoa(svgData);
+                  } else {
+                    alert("No se pudo generar la imagen del código QR. Por favor intenta de nuevo.");
                   }
               }}>
                 Descargar PNG
@@ -217,6 +264,27 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
           <div className="space-y-6 pb-20">
             {activeTab === "general" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Logo de la Empresa</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-20 w-20 rounded-lg border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group">
+                        {previewData?.logoUrl ? (
+                            <img src={previewData.logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                        ) : (
+                            <ImageIcon className="h-8 w-8 text-slate-500" />
+                        )}
+                        <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                            <Upload className="h-6 w-6 text-white" />
+                            <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                        </label>
+                    </div>
+                    <div className="text-sm text-slate-400">
+                        <p>Sube tu logo en formato PNG o JPG.</p>
+                        <p className="text-xs mt-1">Recomendado: 500x500px</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label className="text-slate-300">Nombre del Negocio / Título</Label>
                   <Input 
@@ -244,6 +312,15 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                       onChange={(e: any) => handlePreviewChange("slug", e.target.value)}
                       className="bg-slate-800 border-slate-700 text-white focus:ring-blue-500"
                     />
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 p-2 bg-slate-900/50 rounded border border-slate-800">
+                     <span className="text-xs text-slate-400 font-mono truncate flex-1">
+                        {typeof window !== 'undefined' ? `${window.location.origin}/${previewData?.slug}` : `tuvitrina.xyz/${previewData?.slug}`}
+                     </span>
+                     <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-slate-400 hover:text-white" onClick={handleCopySlug}>
+                        {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                        <span className="ml-1 text-xs">{copied ? 'Copiado' : 'Copiar'}</span>
+                     </Button>
                   </div>
                 </div>
 
@@ -286,8 +363,80 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
             )}
 
             {activeTab === "redes" && (
-              <div className="text-center py-10 text-slate-400">
-                <p>Gestión de enlaces próximamente...</p>
+              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium text-white">Mis Redes Sociales</h3>
+                    <Button size="sm" onClick={addLink} className="gap-2">
+                        <Plus size={16} /> Agregar Link
+                    </Button>
+                </div>
+                
+                <div className="space-y-4">
+                    {links.length === 0 && (
+                        <div className="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-lg">
+                            <Smartphone className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                            <p>No has agregado ninguna red social aún.</p>
+                        </div>
+                    )}
+                    
+                    {links.map((link: any, index: number) => (
+                        <div key={index} className="bg-slate-900/50 p-4 rounded-lg border border-slate-800 flex flex-col gap-3 group">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 space-y-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs text-slate-400">Etiqueta (Ej. WhatsApp)</Label>
+                                            <Input 
+                                                value={link.label} 
+                                                onChange={(e: any) => updateLink(index, "label", e.target.value)}
+                                                placeholder="Nombre de la red"
+                                                className="bg-slate-800 border-slate-700 h-8"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs text-slate-400">Icono</Label>
+                                            <select 
+                                                value={link.icon} 
+                                                onChange={(e) => updateLink(index, "icon", e.target.value)}
+                                                className="flex h-8 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                            >
+                                                <option value="Link">Enlace General</option>
+                                                <option value="Facebook">Facebook</option>
+                                                <option value="Instagram">Instagram</option>
+                                                <option value="Twitter">Twitter / X</option>
+                                                <option value="Linkedin">LinkedIn</option>
+                                                <option value="Youtube">YouTube</option>
+                                                <option value="Whatsapp">WhatsApp</option>
+                                                <option value="Tiktok">TikTok</option>
+                                                <option value="MapPin">Ubicación</option>
+                                                <option value="Mail">Email</option>
+                                                <option value="Phone">Teléfono</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs text-slate-400">URL / Enlace</Label>
+                                        <Input 
+                                            value={link.url} 
+                                            onChange={(e: any) => updateLink(index, "url", e.target.value)}
+                                            placeholder="https://..."
+                                            className="bg-slate-800 border-slate-700 h-8 font-mono text-xs"
+                                        />
+                                    </div>
+                                </div>
+                                <Button 
+                                    size="icon" 
+                                    variant="destructive" 
+                                    onClick={() => removeLink(index)}
+                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Eliminar"
+                                >
+                                    <Trash size={14} />
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
               </div>
             )}
 

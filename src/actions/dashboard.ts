@@ -51,6 +51,8 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const themeColor = formData.get("themeColor") as string;
   const location = formData.get("location") as string;
   const slug = formData.get("slug") as string;
+  const logoUrl = formData.get("logoUrl") as string;
+  const linksJson = formData.get("links") as string;
 
   // Validate theme color update based on plan
   const finalThemeColor = limits.allowThemeColor ? themeColor : user.businessCard.themeColor;
@@ -59,15 +61,36 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const finalLocation = limits.allowLocation ? location : user.businessCard.location;
 
   try {
-    await prisma.businessCard.update({
-      where: { id: user.businessCard.id },
-      data: {
-        title,
-        description,
-        themeColor: finalThemeColor,
-        location: finalLocation,
-        slug,
-      },
+    await prisma.$transaction(async (tx) => {
+      // Update Card Basic Info
+      await tx.businessCard.update({
+        where: { id: user.businessCard!.id },
+        data: {
+          title,
+          description,
+          themeColor: finalThemeColor,
+          location: finalLocation,
+          slug,
+          logoUrl,
+        },
+      });
+
+      // Update Links if provided
+      if (linksJson) {
+        const links = JSON.parse(linksJson);
+        await tx.link.deleteMany({ where: { cardId: user.businessCard!.id } });
+        if (links.length > 0) {
+            await tx.link.createMany({
+            data: links.map((link: any, index: number) => ({
+                cardId: user.businessCard!.id,
+                icon: link.icon,
+                label: link.label,
+                url: link.url,
+                order: index,
+            })),
+            });
+        }
+      }
     });
 
     revalidatePath("/dashboard");
@@ -77,6 +100,60 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   } catch (error) {
     console.error("Error updating card:", error);
     return { message: "Error al actualizar la tarjeta" };
+  }
+}
+
+export async function updateSocialLinks(prevState: any, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return { message: "No autenticado" };
+  }
+
+  const targetUserId = formData.get("targetUserId") as string;
+  const isSelf = !targetUserId || targetUserId === session.user.id;
+  
+  if (!isSelf && session.user.role !== Role.ADMIN) {
+     return { message: "No autorizado para editar esta tarjeta" };
+  }
+
+  const userIdToUpdate = isSelf ? session.user.id : targetUserId;
+  const whereClause = isSelf ? { email: session.user.email } : { id: userIdToUpdate };
+
+  const user = await prisma.user.findUnique({
+    where: whereClause as any,
+    include: { businessCard: true },
+  });
+
+  if (!user || !user.businessCard) {
+    return { message: "Usuario o tarjeta no encontrados" };
+  }
+
+  try {
+    const linksJson = formData.get("links") as string;
+    const links = JSON.parse(linksJson);
+
+    // Delete existing links and create new ones (simplest approach for full sync)
+    // Alternatively, update/create/delete based on ID, but full sync is safer for order
+    await prisma.$transaction([
+      prisma.link.deleteMany({ where: { cardId: user.businessCard.id } }),
+      prisma.link.createMany({
+        data: links.map((link: any, index: number) => ({
+          cardId: user.businessCard.id,
+          icon: link.icon,
+          label: link.label,
+          url: link.url,
+          order: index,
+        })),
+      }),
+    ]);
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/${user.businessCard.slug}`);
+
+    return { message: "Redes sociales actualizadas", success: true };
+  } catch (error) {
+    console.error("Error updating links:", error);
+    return { message: "Error al actualizar redes sociales" };
   }
 }
 
