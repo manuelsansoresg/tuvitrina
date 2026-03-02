@@ -6,22 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, Plus, Trash, GripVertical, Image as ImageIcon, 
   MapPin, Link as LinkIcon, Save, Eye, Smartphone, 
-  LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft
+  LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft,
+  Info
 } from "lucide-react";
 import { useFormStatus } from "react-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { slugify } from "@/lib/utils";
 import { PlanType, Role, BusinessCard, Link as LinkModel, GalleryImage, Product } from "@prisma/client";
 import { PLAN_LIMITS } from "@/lib/constants";
@@ -50,7 +42,7 @@ interface DashboardClientProps {
 
 export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("contenido");
+  const [activeTab, setActiveTab] = useState("info");
   const [isPending, startTransition] = useTransition();
   
   // Use extended type or fallback to any if types are still propagating
@@ -257,15 +249,37 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
         {/* Toolbar */}
         <div className="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/50 backdrop-blur-sm z-10">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            <TabButton active={activeTab === "contenido"} onClick={() => setActiveTab("contenido")} icon={<LayoutTemplate size={18} />}>
-              Contenido
+            {isAdmin && (
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="mr-2 text-slate-400 hover:text-white"
+                    title="Volver a Admin"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+            )}
+            
+            <TabButton active={activeTab === "info"} onClick={() => setActiveTab("info")} icon={<Info size={18} />}>
+              Info
             </TabButton>
-            <TabButton active={activeTab === "diseno"} onClick={() => setActiveTab("diseno")} icon={<Palette size={18} />}>
-              Diseño
+            
+            <TabButton active={activeTab === "enlaces"} onClick={() => setActiveTab("enlaces")} icon={<LinkIcon size={18} />}>
+              Enlaces
             </TabButton>
-            <TabButton active={activeTab === "productos"} onClick={() => setActiveTab("productos")} icon={<Smartphone size={18} />}>
-              Productos
-            </TabButton>
+            
+            {limits.galleryImages > 0 && (
+                <TabButton active={activeTab === "galeria"} onClick={() => setActiveTab("galeria")} icon={<ImageIcon size={18} />}>
+                  Galería
+                </TabButton>
+            )}
+            
+            {limits.allowThemeColor && (
+                <TabButton active={activeTab === "diseno"} onClick={() => setActiveTab("diseno")} icon={<Palette size={18} />}>
+                  Diseño
+                </TabButton>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="lg:hidden text-slate-400">
@@ -302,7 +316,8 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
             
             <input type="hidden" name="id" value={data.user.businessCard?.id} />
 
-            {activeTab === "contenido" && (
+            {/* Pestaña de Información Básica */}
+            {activeTab === "info" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
                 {/* Basic Info Section */}
                 <div className="space-y-4">
@@ -421,143 +436,142 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                   </div>
 
                 </div>
+              </div>
+            )}
 
-
-                  {/* Links Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                       <Label className="text-slate-300">Enlaces ({links.length}/{limits.links})</Label>
-                       <Button 
-                         type="button" 
-                         variant="outline" 
-                         size="sm" 
-                         onClick={handleAddLink}
-                         className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
-                       >
-                         <Plus size={14} className="mr-1" /> Agregar
-                       </Button>
-                    </div>
-                    
-                    <div className="space-y-3">
-                       {links.map((link, index) => (
-                          <div key={link.id} className="group p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-                             <div className="cursor-move text-slate-600 hover:text-slate-400">
-                                <GripVertical size={16} />
-                             </div>
-                             <div className="flex-1 space-y-2">
-                                <Input 
-                                   placeholder="Título del enlace" 
-                                   value={link.label}
-                                   onChange={(e) => handleLinkChange(index, "label", e.target.value)}
-                                   className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500"
-                                />
-                                <div className="flex items-center gap-2">
-                                   <div className="p-1.5 rounded bg-slate-900 border border-slate-700 text-slate-500">
-                                      <LinkIcon size={12} />
-                                   </div>
-                                   <Input 
-                                      placeholder="https://..." 
-                                      value={link.url}
-                                      onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                                      className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono"
-                                   />
+            {/* Pestaña de Enlaces */}
+            {activeTab === "enlaces" && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                        <Label className="text-slate-300">Enlaces ({links.length}/{limits.links})</Label>
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleAddLink}
+                            className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
+                        >
+                            <Plus size={14} className="mr-1" /> Agregar
+                        </Button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                        {links.map((link, index) => (
+                            <div key={link.id} className="group p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                                <div className="cursor-move text-slate-600 hover:text-slate-400">
+                                    <GripVertical size={16} />
                                 </div>
-                             </div>
-                             <Button 
-                               type="button" 
-                               variant="ghost" 
-                               size="icon" 
-                               onClick={() => handleRemoveLink(index)}
-                               className="h-8 w-8 text-slate-500 hover:text-red-400 hover:bg-red-900/20"
-                             >
+                                <div className="flex-1 space-y-2">
+                                    <Input 
+                                    placeholder="Título del enlace" 
+                                    value={link.label}
+                                    onChange={(e) => handleLinkChange(index, "label", e.target.value)}
+                                    className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500"
+                                    />
+                                    <div className="flex items-center gap-2">
+                                    <div className="p-1.5 rounded bg-slate-900 border border-slate-700 text-slate-500">
+                                        <LinkIcon size={12} />
+                                    </div>
+                                    <Input 
+                                        placeholder="https://..." 
+                                        value={link.url}
+                                        onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                                        className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono"
+                                    />
+                                    </div>
+                                </div>
+                                <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleRemoveLink(index)}
+                                className="h-8 w-8 text-slate-500 hover:text-red-400 hover:bg-red-900/20"
+                                >
                                 <Trash size={14} />
-                             </Button>
-                          </div>
-                       ))}
-                       
-                       {links.length === 0 && (
-                          <div className="text-center p-6 border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
-                             <p className="text-xs text-slate-500 mb-2">No tienes enlaces agregados</p>
-                             <Button type="button" variant="link" size="sm" onClick={handleAddLink} className="text-blue-400 h-auto p-0 text-xs">
-                                Agregar el primero
-                             </Button>
-                          </div>
-                       )}
+                                </Button>
+                            </div>
+                        ))}
+                        </div>
                     </div>
-                  </div>
-
-                  {/* Gallery Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                       <Label className="text-slate-300">Galería ({gallery.length}/{limits.galleryImages})</Label>
-                       <Button 
-                         type="button" 
-                         variant="outline" 
-                         size="sm" 
-                         onClick={handleAddGalleryImage}
-                         className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
-                       >
-                         <Plus size={14} className="mr-1" /> Agregar Imagen
-                       </Button>
-                       <input 
-                          type="file" 
-                          id="gallery-upload" 
-                          accept="image/*" 
-                          className="hidden" 
-                          onChange={handleGalleryImageUpload}
-                       />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                       {gallery.map((img, index) => (
-                          <div key={img.id} className="relative group bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                             <div className="aspect-square relative">
-                                <img src={img.imageUrl} alt="Gallery" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                   <Button 
-                                      type="button" 
-                                      variant="destructive" 
-                                      size="icon" 
-                                      className="h-8 w-8 rounded-full"
-                                      onClick={() => handleRemoveGalleryImage(index)}
-                                   >
-                                      <Trash size={14} />
-                                   </Button>
-                                </div>
-                             </div>
-                             <div className="p-2 space-y-2 bg-slate-900/50">
-                                <Input 
-                                   placeholder="Título (opcional)" 
-                                   value={img.title || ""} 
-                                   onChange={(e) => handleGalleryImageChange(index, "title", e.target.value)}
-                                   className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
-                                />
-                                <Input 
-                                   type="number"
-                                   placeholder="Precio (opcional)" 
-                                   value={img.price || ""} 
-                                   onChange={(e) => handleGalleryImageChange(index, "price", e.target.value)}
-                                   className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
-                                />
-                             </div>
-                          </div>
-                       ))}
-                       
-                       {gallery.length < limits.galleryImages && (
-                          <button 
-                             type="button"
-                             onClick={handleAddGalleryImage}
-                             className="aspect-square rounded-lg border-2 border-dashed border-slate-800 bg-slate-900/30 hover:bg-slate-800 hover:border-slate-700 transition-all flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-slate-300"
-                          >
-                             <Plus size={24} />
-                             <span className="text-xs">Agregar</span>
-                          </button>
-                       )}
-                    </div>
-                  </div>
                 </div>
             )}
 
+            {/* Pestaña de Galería */}
+            {activeTab === "galeria" && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-slate-300">Galería ({gallery.length}/{limits.galleryImages})</Label>
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleAddGalleryImage}
+                                className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
+                            >
+                                <Plus size={14} className="mr-1" /> Agregar Imagen
+                            </Button>
+                            <input 
+                                type="file" 
+                                id="gallery-upload" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={handleGalleryImageUpload}
+                            />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                        {gallery.map((img, index) => (
+                            <div key={img.id} className="relative group bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                                <div className="aspect-square relative">
+                                    <img src={img.imageUrl} alt="Gallery" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <Button 
+                                        type="button" 
+                                        variant="destructive" 
+                                        size="icon" 
+                                        className="h-8 w-8 rounded-full"
+                                        onClick={() => handleRemoveGalleryImage(index)}
+                                    >
+                                        <Trash size={14} />
+                                    </Button>
+                                    </div>
+                                </div>
+                                <div className="p-2 space-y-2 bg-slate-900/50">
+                                    <Input 
+                                    placeholder="Título (opcional)" 
+                                    value={img.title || ""} 
+                                    onChange={(e) => handleGalleryImageChange(index, "title", e.target.value)}
+                                    className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
+                                    />
+                                    <Input 
+                                    type="number"
+                                    placeholder="Precio (opcional)" 
+                                    value={img.price || ""} 
+                                    onChange={(e) => handleGalleryImageChange(index, "price", e.target.value)}
+                                    className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                        
+                        {gallery.length < limits.galleryImages && (
+                            <button 
+                                type="button"
+                                onClick={handleAddGalleryImage}
+                                className="aspect-square rounded-lg border-2 border-dashed border-slate-800 bg-slate-900/30 hover:bg-slate-800 hover:border-slate-700 transition-all flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-slate-300"
+                            >
+                                <Plus size={24} />
+                                <span className="text-xs">Agregar</span>
+                            </button>
+                        )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Pestaña de Diseño */}
             {activeTab === "diseno" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
                 <div className="space-y-6">
@@ -682,15 +696,6 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Other tabs would go here */}
-            {activeTab === "productos" && (
-                <div className="text-center py-20 text-slate-500">
-                    <Smartphone size={48} className="mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-medium text-white mb-2">Gestión de Productos</h3>
-                    <p>Próximamente podrás gestionar tu catálogo de productos aquí.</p>
-                </div>
             )}
 
             {/* Fixed Bottom Bar */}
@@ -891,15 +896,12 @@ function ColorPicker({
             />
         </div>
         <div className="flex-1">
-             <Input 
-                type="text" 
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                maxLength={9}
-                disabled={disabled}
-                className="h-10 font-mono text-sm bg-slate-800 border-slate-700 text-slate-300 focus:ring-blue-500 uppercase"
-                placeholder="#000000"
-             />
+          <Input 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            className="h-10 bg-slate-800 border-slate-700 font-mono"
+          />
         </div>
       </div>
     </div>
