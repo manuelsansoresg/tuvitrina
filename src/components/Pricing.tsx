@@ -73,7 +73,7 @@ export function Pricing() {
     <section id="pricing" className="py-20 px-6 bg-gradient-to-b from-slate-900 to-slate-800">
       <div className="max-w-6xl mx-auto text-center mb-12">
         <h2 className="text-3xl md:text-5xl font-bold mb-4 text-slate-50">Elige tu Plan</h2>
-        <p className="text-slate-400">Pago único. Sin mensualidades ocultas.</p>
+        <p className="text-slate-400">Planes anuales con todo incluido. Sin costos ocultos.</p>
       </div>
 
       <motion.div 
@@ -109,7 +109,7 @@ export function Pricing() {
               </span>
               <div className="text-4xl font-bold text-white leading-none">
                 {plan.price}
-                <span className="text-lg text-slate-500 font-normal ml-1">MXN</span>
+                <span className="text-lg text-slate-500 font-normal ml-1">MXN / año</span>
               </div>
             </div>
             

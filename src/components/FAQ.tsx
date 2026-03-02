@@ -7,16 +7,16 @@ import { ChevronDown } from "lucide-react";
 export function FAQ() {
   const faqs = [
     {
-      question: "¿Es pago único?",
-      answer: "Sí, pagas una sola vez por el diseño y la configuración. No hay mensualidades ni anualidades ocultas."
+      question: "¿El pago es mensual o anual?",
+      answer: "El pago es 100% anual. Realizas un único pago y tienes acceso a tu tarjeta digital y todas sus funciones durante todo un año, sin mensualidades ni comisiones ocultas."
     },
     {
-      question: "¿Cómo la comparto?",
-      answer: "Puedes compartirla por WhatsApp, correo, redes sociales o mediante tu código QR personalizado. Es compatible con cualquier celular."
+      question: "¿Cómo comparto mi tarjeta?",
+      answer: "Puedes compartirla ilimitadamente por WhatsApp, redes sociales, correo o mediante tu código QR personalizado. Funciona en cualquier dispositivo móvil sin instalar apps."
     },
     {
-      question: "¿Puedo cambiar mi teléfono después?",
-      answer: "¡Claro! Solo contáctanos y actualizamos tu información al instante para que tus clientes siempre tengan tus datos correctos."
+      question: "¿Puedo actualizar mi información?",
+      answer: "¡Sí! Todos los planes incluyen acceso a un panel de control donde puedes editar tu teléfono, enlaces, fotos y productos en tiempo real, las veces que quieras."
     }
   ];
 
