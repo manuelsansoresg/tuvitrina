@@ -11,8 +11,10 @@ import {
   Loader2, Plus, Trash, GripVertical, Image as ImageIcon, 
   MapPin, Link as LinkIcon, Save, Eye, Smartphone, 
   LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft,
-  Info, Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Mail, Phone, Globe
+  Info, Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Mail, Phone, Globe,
+  QrCode
 } from "lucide-react";
+import { QRCodeCard } from "@/components/QRCodeCard";
 import {
   Select,
   SelectContent,
@@ -303,6 +305,10 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                   Diseño
                 </TabButton>
             )}
+
+            <TabButton active={activeTab === "qr"} onClick={() => setActiveTab("qr")} icon={<QrCode size={18} />}>
+              QR
+            </TabButton>
             
             {/* Pestaña de Productos (Deshabilitada por solicitud) */}
             {/* {limits.products > 0 && (
@@ -829,6 +835,24 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Pestaña de QR */}
+            {activeTab === "qr" && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-white">Código QR</h3>
+                        <p className="text-sm text-slate-400">Comparte tu tarjeta digital fácilmente con este código QR.</p>
+                        
+                        <div className="flex justify-center py-8">
+                             <QRCodeCard 
+                                url={typeof window !== 'undefined' ? `${window.location.origin}/${previewData?.slug}` : `tuvitrina.xyz/${previewData?.slug}`} 
+                                logoUrl={previewData?.logoUrl} 
+                                title={previewData?.title}
+                             />
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Fixed Bottom Bar */}

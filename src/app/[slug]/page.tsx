@@ -203,18 +203,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             )}
          </div>
          
-         {/* QR Code Section */}
-            <div className="mb-8 px-6">
-               <h2 
-                 className="text-sm font-bold mb-3 text-left uppercase tracking-wider"
-                 style={{ color: extendedCard.titleColor || '#0f172a' }}
-               >
-                 Comparte mi tarjeta
-               </h2>
-               <QRCodeCard url={fullUrl} logoUrl={extendedCard.logoUrl} title={extendedCard.title} />
-            </div>
-
-            {/* Footer */}
+         {/* Footer */}
          <div className="py-6 text-center border-t border-white/10" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
             <p className="text-[10px] font-medium" style={{ color: extendedCard.descriptionColor || '#94a3b8' }}>Powered by TuVitrina</p>
          </div>
