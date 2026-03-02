@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tuvitrina.xyz"),
   title: "TuVitrina | Tarjetas Digitales y Perfiles de Negocio Profesional",
   description: "Crea tu tarjeta de presentación digital y potencia tu identidad profesional. Tu espacio digital para emprendedores con vcard inteligente.",
   keywords: [
@@ -23,8 +24,18 @@ export const metadata: Metadata = {
     "vcard inteligente",
     "espacio digital para emprendedores"
   ],
-  icons: {
-    icon: "/images/logo-tu-vitrina.png",
+  openGraph: {
+    title: "TuVitrina | Tarjetas Digitales y Perfiles de Negocio Profesional",
+    description: "Crea tu tarjeta de presentación digital y potencia tu identidad profesional.",
+    url: "https://tuvitrina.xyz",
+    siteName: "TuVitrina",
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TuVitrina | Tarjetas Digitales",
+    description: "Potencia tu identidad profesional con una tarjeta digital inteligente.",
   },
 };
 
