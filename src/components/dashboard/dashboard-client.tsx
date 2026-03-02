@@ -91,15 +91,95 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
     }));
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image resize helper
+  const resizeImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > 800) { // Max height check
+               width *= 800 / height;
+               height = 800;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', quality));
+        };
+      };
+    });
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handlePreviewChange("logoUrl", reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const resized = await resizeImage(file, 500, 0.8);
+        handlePreviewChange("logoUrl", resized);
+      } catch (err) {
+        console.error("Error resizing logo:", err);
+      }
     }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const remainingSlots = limits.galleryImages - (previewData?.gallery?.length || 0);
+      if (remainingSlots <= 0) {
+        setShowUpgradeModal(true);
+        return;
+      }
+
+      const filesToProcess = Array.from(files).slice(0, remainingSlots);
+      
+      // Process sequentially or parallel
+      const processedImages: any[] = [];
+      
+      for (const file of filesToProcess) {
+         try {
+           const resized = await resizeImage(file, 1000, 0.8);
+           processedImages.push({ 
+             imageUrl: resized, 
+             order: (previewData?.gallery?.length || 0) + processedImages.length 
+           });
+         } catch (err) {
+           console.error("Error resizing gallery image:", err);
+         }
+      }
+
+      setPreviewData((prev: any) => ({
+        ...prev,
+        gallery: [
+          ...(prev.gallery || []),
+          ...processedImages
+        ]
+      }));
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setPreviewData((prev: any) => {
+      const newGallery = [...(prev.gallery || [])];
+      newGallery.splice(index, 1);
+      return { ...prev, gallery: newGallery };
+    });
   };
 
   const handleCopySlug = () => {
@@ -215,6 +295,7 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                   <input type="hidden" name="slug" value={previewData?.slug || ""} />
                   <input type="hidden" name="logoUrl" value={previewData?.logoUrl || ""} />
                   <input type="hidden" name="links" value={JSON.stringify(links)} />
+                  <input type="hidden" name="gallery" value={JSON.stringify(previewData?.gallery || [])} />
                   
                   <SaveButton />
                 </form>
@@ -270,7 +351,6 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
             <TabButton active={activeTab === "general"} onClick={() => setActiveTab("general")} icon={<LayoutGrid size={16} />}>General</TabButton>
             <TabButton active={activeTab === "redes"} onClick={() => setActiveTab("redes")} icon={<Smartphone size={16} />}>Redes</TabButton>
             <TabButton active={activeTab === "galeria"} onClick={() => setActiveTab("galeria")} icon={<ImageIcon size={16} />}>Galería</TabButton>
-            <TabButton active={activeTab === "productos"} onClick={() => setActiveTab("productos")} icon={<ShoppingBag size={16} />}>Catálogo</TabButton>
             <TabButton active={activeTab === "ubicacion"} onClick={() => setActiveTab("ubicacion")} icon={<MapPin size={16} />}>Ubicación</TabButton>
           </div>
 
@@ -486,17 +566,15 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                      ))}
                      
                      {/* Add Image Button */}
-                     <div 
-                        onClick={() => {
-                          if ((previewData?.gallery?.length || 0) >= limits.galleryImages) {
-                            setShowUpgradeModal(true);
-                          } else {
-                            // Open file picker (mock)
-                            alert("Aquí se abriría el selector de archivos");
-                          }
-                        }}
-                        className="aspect-square bg-slate-800 rounded-lg border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 hover:border-blue-500 hover:text-blue-500 cursor-pointer transition-colors"
-                     >
+                     <div className="relative aspect-square bg-slate-800 rounded-lg border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 hover:border-blue-500 hover:text-blue-500 cursor-pointer transition-colors group">
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                            onChange={handleGalleryUpload}
+                            disabled={(previewData?.gallery?.length || 0) >= limits.galleryImages}
+                        />
                         <ImageIcon size={24} className="mb-2" />
                         <span className="text-xs">
                           {(previewData?.gallery?.length || 0) >= limits.galleryImages ? "Límite Alcanzado" : "Subir Imagen"}
@@ -618,51 +696,45 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
              </div>
 
              <div className="px-6 space-y-4 pb-10">
-                {/* Links Preview Mockup */}
+                {/* Links Preview */}
                 <div className="space-y-3">
-                   {[1, 2, 3].map((i) => (
-                      <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 shadow-sm">
-                         <div className="w-8 h-8 rounded-full bg-slate-200" />
-                         <div className="h-3 w-32 bg-slate-200 rounded" />
+                   {links.length > 0 ? (
+                     links.map((link: any, index: number) => (
+                      <div key={index} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 shadow-sm">
+                         <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-700">
+                            {/* Generic icon for preview */}
+                            <span className="text-lg">🔗</span>
+                         </div>
+                         <span className="font-medium text-slate-700 flex-1 text-left truncate">{link.label || "Enlace"}</span>
+                         <span className="text-slate-400">↗</span>
                       </div>
-                   ))}
+                     ))
+                   ) : (
+                     <div className="text-center p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                        <p className="text-slate-400 text-xs">Agrega enlaces para verlos aquí.</p>
+                     </div>
+                   )}
                 </div>
 
                 {/* Gallery Preview */}
-                {limits.galleryImages > 0 && (
+                {(previewData?.gallery?.length || 0) > 0 && (
                   <div className="mt-6">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2">Galería</h3>
+                    <h3 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-wider">Galería</h3>
                     <div className="grid grid-cols-2 gap-2">
-                       {[1, 2, 3, 4].slice(0, limits.galleryImages > 4 ? 4 : limits.galleryImages).map((i) => (
-                         <div key={i} className="aspect-square bg-slate-200 rounded-lg animate-pulse" />
-                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Products Preview */}
-                {limits.allowProducts && (
-                  <div className="mt-6">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2">Productos Destacados</h3>
-                    <div className="space-y-3">
-                       {[1, 2].map((i) => (
-                         <div key={i} className="flex gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                           <div className="w-16 h-16 bg-slate-200 rounded-lg shrink-0" />
-                           <div className="flex flex-col justify-center gap-2 w-full">
-                             <div className="h-3 w-3/4 bg-slate-200 rounded" />
-                             <div className="h-3 w-1/4 bg-slate-200 rounded" />
-                           </div>
-                         </div>
-                       ))}
-                    </div>
+                        {previewData?.gallery?.map((img: any, i: number) => (
+                          <div key={i} className="aspect-square bg-slate-100 rounded-lg overflow-hidden relative">
+                            <img src={img.imageUrl} alt="Gallery" className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                     </div>
                   </div>
                 )}
 
                 {/* Location Preview */}
                 {limits.allowLocation && previewData?.location && (
                    <div className="mt-6">
-                      <h3 className="text-sm font-bold text-slate-900 mb-2">Ubicación</h3>
-                      <div className="rounded-xl overflow-hidden border border-slate-100 h-40 bg-slate-100 flex items-center justify-center text-slate-400 text-xs relative group">
+                      <h3 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-wider">Ubicación</h3>
+                      <div className="rounded-xl overflow-hidden border border-slate-100 h-40 bg-slate-100 relative">
                          <iframe 
                            src={previewData.location} 
                            width="100%" 
@@ -673,7 +745,6 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                            referrerPolicy="no-referrer-when-downgrade"
                            className="absolute inset-0 pointer-events-none"
                          />
-                         <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors" />
                       </div>
                    </div>
                 )}

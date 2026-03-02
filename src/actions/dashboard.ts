@@ -50,9 +50,20 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const description = formData.get("description") as string;
   const themeColor = formData.get("themeColor") as string;
   const location = formData.get("location") as string;
-  const slug = formData.get("slug") as string;
+  let slug = formData.get("slug") as string;
+  
+  // Sanitize slug server-side
+  if (slug) {
+    slug = slug.toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   const logoUrl = formData.get("logoUrl") as string;
   const linksJson = formData.get("links") as string;
+  const galleryJson = formData.get("gallery") as string;
 
   // Validate theme color update based on plan
   const finalThemeColor = limits.allowThemeColor ? themeColor : user.businessCard.themeColor;
@@ -89,6 +100,24 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
                 order: index,
             })),
             });
+        }
+      }
+
+      // Update Gallery if provided
+      if (galleryJson) {
+        const gallery = JSON.parse(galleryJson);
+        // Only update gallery if we have valid data (array)
+        if (Array.isArray(gallery)) {
+            await tx.galleryImage.deleteMany({ where: { cardId: user.businessCard!.id } });
+            if (gallery.length > 0) {
+                await tx.galleryImage.createMany({
+                    data: gallery.map((img: any, index: number) => ({
+                        cardId: user.businessCard!.id,
+                        imageUrl: img.imageUrl,
+                        order: index,
+                    })),
+                });
+            }
         }
       }
     });
