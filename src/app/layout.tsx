@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     "vcard inteligente",
     "espacio digital para emprendedores"
   ],
+  icons: {
+    icon: "/images/logo-tu-vitrina.png",
+  },
 };
 
 export default function RootLayout({

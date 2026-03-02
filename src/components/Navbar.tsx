@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 export function Navbar({ user }: { user?: any }) {
@@ -11,8 +12,18 @@ export function Navbar({ user }: { user?: any }) {
     <nav className="fixed top-16 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50 rounded-full border border-white/10 bg-slate-900/60 backdrop-blur-md shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Logo */}
-        <a href="#" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-start to-primary-end">
-          TuVitrina
+        <a href="#" className="flex items-center gap-2">
+          <div className="relative w-8 h-8">
+            <Image
+              src="/images/logo-tu-vitrina.png"
+              alt="TuVitrina Logo"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-start to-primary-end">
+            TuVitrina
+          </span>
         </a>
 
         {/* Desktop Menu */}
