@@ -5,7 +5,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { Role, PlanType } from "@prisma/client";
 import DashboardClient from "@/components/dashboard/dashboard-client";
 
-export default async function AdminEditCardPage({ params }: { params: { id: string } }) {
+export default async function AdminEditCardPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   
   // Security check: Only Admins can access this route
@@ -13,7 +13,7 @@ export default async function AdminEditCardPage({ params }: { params: { id: stri
     redirect("/");
   }
 
-  const targetUserId = params.id;
+  const { id: targetUserId } = await params;
 
   const user = await prisma.user.findUnique({
     where: { id: targetUserId },
