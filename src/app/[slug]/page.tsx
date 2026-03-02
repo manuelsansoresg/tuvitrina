@@ -131,7 +131,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                        style={{ borderColor: extendedCard.themeColor ? `${extendedCard.themeColor}40` : undefined }}
                      >
                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-colors text-slate-700">
-                          <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} />
+                          <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} style={{ color: extendedCard.iconColor || undefined }} />
                        </div>
                        <span 
                          className="font-medium flex-1 text-left"

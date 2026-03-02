@@ -51,6 +51,7 @@ model BusinessCard {
   cardBackgroundImage String?
   titleColor          String? @default("#0f172a") // slate-900
   descriptionColor    String? @default("#64748b") // slate-500
+  iconColor           String? // Custom icon color, null = brand colors
   galleryTitleColor   String? @default("#ffffff") // Default white for gallery overlay
   galleryPriceColor   String? @default("#4ade80") // Default green-400 for gallery overlay
 

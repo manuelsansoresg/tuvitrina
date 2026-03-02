@@ -303,6 +303,13 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                   Diseño
                 </TabButton>
             )}
+            
+            {/* Pestaña de Productos (Deshabilitada por solicitud) */}
+            {/* {limits.products > 0 && (
+                <TabButton active={activeTab === "productos"} onClick={() => setActiveTab("productos")} icon={<LayoutTemplate size={18} />}>
+                  Productos
+                </TabButton>
+            )} */}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="lg:hidden text-slate-400">
@@ -313,18 +320,29 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
 
         {/* Scrollable Form Area */}
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-          <form action={async (formData) => {
-            // Append complex objects as JSON strings
-            formData.append("links", JSON.stringify(links));
+            <form action={async (formData) => {
+             formData.append("targetUserId", data.user.id);
+ 
+              // Append complex objects as JSON strings
+              formData.append("links", JSON.stringify(links));
             formData.append("gallery", JSON.stringify(gallery));
             formData.append("products", JSON.stringify(products));
             
-            // Add design fields
+            // Add design fields and basic info manually since they might not be in DOM if tab is hidden
             if (previewData) {
+               formData.set("title", previewData.title || "");
+               formData.set("description", previewData.description || "");
+               formData.set("slug", previewData.slug || "");
+               formData.set("logoUrl", previewData.logoUrl || "");
+               formData.set("bannerUrl", previewData.bannerUrl || "");
+               formData.set("themeColor", previewData.themeColor || "");
+               formData.set("location", previewData.location || "");
+               
                formData.append("cardBackgroundColor", previewData.cardBackgroundColor || "");
                formData.append("cardBackgroundImage", previewData.cardBackgroundImage || "");
                formData.append("titleColor", previewData.titleColor || "");
                formData.append("descriptionColor", previewData.descriptionColor || "");
+               formData.append("iconColor", previewData.iconColor || "");
                formData.append("galleryTitleColor", previewData.galleryTitleColor || "");
                formData.append("galleryPriceColor", previewData.galleryPriceColor || "");
             }
@@ -706,6 +724,26 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                               disabled={!limits.allowThemeColor}
                             />
                         </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs text-slate-400">Color de Iconos</Label>
+                                {previewData?.iconColor && (
+                                    <button 
+                                        type="button"
+                                        onClick={() => handlePreviewChange("iconColor", null)}
+                                        className="text-[10px] text-blue-400 hover:text-blue-300"
+                                    >
+                                        Restaurar originales
+                                    </button>
+                                )}
+                            </div>
+                            <ColorPicker 
+                              value={previewData?.iconColor || "#334155"} 
+                              onChange={(val) => handlePreviewChange("iconColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
                      </div>
                   </div>
 
@@ -808,7 +846,7 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                             {(() => {
                                const iconObj = LINK_ICONS.find(i => i.value === link.icon) || LINK_ICONS[0];
                                const IconComp = iconObj.icon;
-                               return <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} />;
+                               return <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} style={{ color: previewData?.iconColor || undefined }} />;
                             })()}
                          </div>
                          <div className="flex-1 min-w-0">

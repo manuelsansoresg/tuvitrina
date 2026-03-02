@@ -71,6 +71,7 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const cardBackgroundImage = formData.get("cardBackgroundImage") as string;
   const titleColor = formData.get("titleColor") as string;
   const descriptionColor = formData.get("descriptionColor") as string;
+  const iconColor = formData.get("iconColor") as string;
   const galleryTitleColor = formData.get("galleryTitleColor") as string;
   const galleryPriceColor = formData.get("galleryPriceColor") as string;
 
@@ -85,6 +86,7 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const finalCardBackgroundImage = canCustomizeColors ? cardBackgroundImage : user.businessCard.cardBackgroundImage;
   const finalTitleColor = canCustomizeColors ? titleColor : user.businessCard.titleColor;
   const finalDescriptionColor = canCustomizeColors ? descriptionColor : user.businessCard.descriptionColor;
+  const finalIconColor = canCustomizeColors ? iconColor : user.businessCard.iconColor;
   const finalGalleryTitleColor = canCustomizeColors ? galleryTitleColor : user.businessCard.galleryTitleColor;
   const finalGalleryPriceColor = canCustomizeColors ? galleryPriceColor : user.businessCard.galleryPriceColor;
 
@@ -108,6 +110,7 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
           cardBackgroundImage: finalCardBackgroundImage,
           titleColor: finalTitleColor,
           descriptionColor: finalDescriptionColor,
+          iconColor: finalIconColor,
           galleryTitleColor: finalGalleryTitleColor,
           galleryPriceColor: finalGalleryPriceColor,
         },

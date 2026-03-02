@@ -32,10 +32,12 @@ export default async function AdminEditCardPage({ params }: { params: Promise<{ 
     return <div>Usuario no encontrado</div>;
   }
 
-  // Admin gets Premium limits for editing
+  // Admin should respect User's plan limits for editing experience
+  const limits = PLAN_LIMITS[user.plan as PlanType] || PLAN_LIMITS.EXPRESS;
+
   const data = {
     user,
-    limits: PLAN_LIMITS.PREMIUM, 
+    limits, 
   };
 
   return <DashboardClient data={data as any} targetUserId={targetUserId} isSessionAdmin={true} />;
