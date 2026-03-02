@@ -259,6 +259,10 @@ function UsersPanel({
                             <label className="text-sm font-medium text-slate-300">Email</label>
                             <Input name="email" type="email" defaultValue={selectedUser.email} placeholder="usuario@ejemplo.com" required />
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300">Nueva Contraseña (Opcional)</label>
+                            <Input name="password" type="password" placeholder="Dejar en blanco para mantener actual" minLength={6} />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-300">Rol</label>

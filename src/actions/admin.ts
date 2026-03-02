@@ -94,6 +94,7 @@ const UpdateUserSchema = z.object({
   email: z.string().email(),
   role: z.nativeEnum(Role),
   plan: z.nativeEnum(PlanType),
+  password: z.string().optional(),
 });
 
 export async function updateUser(prevState: any, formData: FormData) {
@@ -102,12 +103,17 @@ export async function updateUser(prevState: any, formData: FormData) {
 
     const rawData = Object.fromEntries(formData.entries());
     
+    // Handle empty password string as undefined
+    if (rawData.password === "") {
+        delete rawData.password;
+    }
+
     const validated = UpdateUserSchema.safeParse(rawData);
     if (!validated.success) {
         return { message: "Datos inválidos", success: false };
     }
 
-    const { id, name, email, role, plan } = validated.data;
+    const { id, name, email, role, plan, password } = validated.data;
 
     const targetUser = await prisma.user.findUnique({ where: { id } });
     
@@ -126,9 +132,17 @@ export async function updateUser(prevState: any, formData: FormData) {
     }
 
     try {
+        const updateData: any = { name, email, role, plan };
+        
+        if (password && password.length >= 6) {
+            updateData.password = await bcrypt.hash(password, 10);
+        } else if (password && password.length < 6) {
+            return { message: "La contraseña debe tener al menos 6 caracteres", success: false };
+        }
+
         await prisma.user.update({
             where: { id },
-            data: { name, email, role, plan }
+            data: updateData
         });
         revalidatePath("/admin");
         return { message: "Usuario actualizado", success: true };
