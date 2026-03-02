@@ -5,7 +5,7 @@ import { createAdminUser, toggleUserStatus, deleteUser, updateUser } from "@/act
 import { logout } from "@/actions/auth";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { Users, DollarSign, Activity, Edit, Trash, Eye, EyeOff, Plus, Shield, Settings, X, Check, ArrowUpRight, LogOut, LayoutTemplate } from "lucide-react";
+import { Users, DollarSign, Activity, Edit, Trash, Eye, EyeOff, Plus, Shield, Settings, X, Check, ArrowUpRight, LogOut, LayoutTemplate, CreditCard } from "lucide-react";
 
 // --- Custom UI Components ---
 
@@ -339,7 +339,7 @@ function UsersPanel({
                                             title="Editar Usuario"
                                             onClick={() => handleEditUser(user)}
                                         >
-                                            <Settings className="h-6 w-6" />
+                                            <Edit className="h-6 w-6" />
                                         </Button>
 
                                         <Button 
@@ -349,7 +349,7 @@ function UsersPanel({
                                             title="Editar Tarjeta"
                                             onClick={() => router.push(`/admin/users/${user.id}/card`)}
                                         >
-                                            <Edit className="h-6 w-6" />
+                                            <CreditCard className="h-6 w-6" />
                                         </Button>
                                         
                                         <Button 

@@ -58,9 +58,23 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [state, dispatch] = useActionState(updateBusinessCard, null);
   const [copied, setCopied] = useState(false);
+  const [slugInput, setSlugInput] = useState(data.user.businessCard?.slug || "");
   
   const searchParams = useSearchParams();
   const paymentStatus = searchParams.get("payment");
+
+  // Slugify helper
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .normalize("NFD") // Split accents
+      .replace(/[\u0300-\u036f]/g, "") // Remove accents
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with -
+      .replace(/[^\w\-]+/g, "") // Remove all non-word chars
+      .replace(/\-\-+/g, "-"); // Replace multiple - with single -
+  };
 
   useEffect(() => {
     if (paymentStatus === "success") {
@@ -308,8 +322,13 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                   <div className="flex items-center space-x-2">
                     <span className="text-slate-500 text-sm hidden sm:inline">tuvitrina.xyz/</span>
                     <Input 
-                      value={previewData?.slug || ""} 
-                      onChange={(e: any) => handlePreviewChange("slug", e.target.value)}
+                      value={slugInput} 
+                      maxLength={limits.maxSlugLength || 30}
+                      onChange={(e: any) => {
+                        const val = e.target.value;
+                        setSlugInput(val);
+                        handlePreviewChange("slug", slugify(val));
+                      }}
                       className="bg-slate-800 border-slate-700 text-white focus:ring-blue-500"
                     />
                   </div>
@@ -322,6 +341,9 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                         <span className="ml-1 text-xs">{copied ? 'Copiado' : 'Copiar'}</span>
                      </Button>
                   </div>
+                  <p className="text-xs text-slate-500">
+                    Puedes usar espacios y acentos, pero el enlace final se simplificará automáticamente. Máximo {limits.maxSlugLength || 30} caracteres.
+                  </p>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-slate-800">
