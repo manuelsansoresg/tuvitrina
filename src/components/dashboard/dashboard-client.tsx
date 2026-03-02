@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useTransition } from "react";
 import { updateBusinessCard } from "@/actions/dashboard";
 import { Button } from "@/components/ui/button";
@@ -410,17 +412,28 @@ export function DashboardClient({ data }: DashboardClientProps) {
             {activeTab === "diseno" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
                 <div className="space-y-6">
-                  <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
+                    {!limits.allowThemeColor && <LockBadge />}
+                  </div>
+
+                  {!limits.allowThemeColor && (
+                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
+                      <Lock size={16} className="text-yellow-500" />
+                      <span>Actualiza a plan Emprendedor o Premium para personalizar todos los colores y fondos.</span>
+                    </div>
+                  )}
                   
                   {/* Background Color & Image */}
-                  <div className="space-y-4">
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
                     <Label className="text-slate-300">Fondo de la Tarjeta</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
                         <div className="space-y-2">
                             <ColorPicker 
                               label="Color de Fondo" 
                               value={previewData?.cardBackgroundColor || "#ffffff"} 
-                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)} 
+                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)}
+                              disabled={!limits.allowThemeColor}
                             />
                         </div>
 
@@ -433,13 +446,13 @@ export function DashboardClient({ data }: DashboardClientProps) {
                                     ) : (
                                         <ImageIcon className="h-4 w-4 text-slate-500" />
                                     )}
-                                    <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                    <label className={`absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${!limits.allowThemeColor ? 'hidden' : ''}`}>
                                         <Upload className="h-4 w-4 text-white" />
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} />
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} disabled={!limits.allowThemeColor} />
                                     </label>
                                 </div>
                                 {previewData?.cardBackgroundImage ? (
-                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} disabled={!limits.allowThemeColor} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
                                         <Trash size={12} className="mr-1" /> Eliminar
                                     </Button>
                                 ) : (
@@ -453,7 +466,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                   <div className="border-t border-slate-800"></div>
 
                   {/* Text Colors */}
-                  <div className="space-y-4">
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
                      <Label className="text-slate-300">Colores de Texto</Label>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -461,6 +474,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                               label="Título Principal" 
                               value={previewData?.titleColor || "#0f172a"} 
                               onChange={(val) => handlePreviewChange("titleColor", val)} 
+                              disabled={!limits.allowThemeColor}
                             />
                         </div>
 
@@ -469,6 +483,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                               label="Descripción" 
                               value={previewData?.descriptionColor || "#64748b"} 
                               onChange={(val) => handlePreviewChange("descriptionColor", val)} 
+                              disabled={!limits.allowThemeColor}
                             />
                         </div>
                      </div>
@@ -476,7 +491,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
 
                   <div className="border-t border-slate-800"></div>
 
-                  <div className="space-y-4">
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
                      <Label className="text-slate-300">Estilo de Galería</Label>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -484,6 +499,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                               label="Color de Títulos" 
                               value={previewData?.galleryTitleColor || "#ffffff"} 
                               onChange={(val) => handlePreviewChange("galleryTitleColor", val)} 
+                              disabled={!limits.allowThemeColor}
                             />
                         </div>
 
@@ -492,6 +508,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                               label="Color de Precios" 
                               value={previewData?.galleryPriceColor || "#4ade80"} 
                               onChange={(val) => handlePreviewChange("galleryPriceColor", val)} 
+                              disabled={!limits.allowThemeColor}
                             />
                         </div>
                      </div>
@@ -499,27 +516,20 @@ export function DashboardClient({ data }: DashboardClientProps) {
                   
                   <div className="border-t border-slate-800"></div>
 
-                  <div className="space-y-4">
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="flex items-center justify-between">
                       <Label className="text-slate-300 flex items-center gap-2">
                         <Palette size={16} /> Color de Acento (Tema)
                       </Label>
-                      {!limits.allowThemeColor && <LockBadge />}
                     </div>
                     
-                    {limits.allowThemeColor ? (
-                      <div className="max-w-[200px]">
-                        <ColorPicker 
-                          value={previewData?.themeColor || "#000000"} 
-                          onChange={(val) => handlePreviewChange("themeColor", val)} 
-                        />
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
-                        <Lock size={16} />
-                        Actualiza a plan Emprendedor para personalizar colores.
-                      </div>
-                    )}
+                    <div className="max-w-[200px]">
+                      <ColorPicker 
+                        value={previewData?.themeColor || "#000000"} 
+                        onChange={(val) => handlePreviewChange("themeColor", val)} 
+                        disabled={!limits.allowThemeColor}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

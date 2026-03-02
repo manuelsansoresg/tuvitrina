@@ -40,7 +40,7 @@ export function Pricing() {
       name: "Emprendedor",
       price: "$799",
       originalPrice: "$999",
-      features: ["Galería de 3-5 fotos", "Diseño de marca", "Ubicación Maps", "Todo lo del Express"],
+      features: ["Galería de 3-5 fotos", "Personalización Total", "Diseño de marca", "Ubicación Maps", "Todo lo del Express"],
       copy: "Muestra tus mejores productos mientras te contactan",
       highlight: true
     },
@@ -48,7 +48,7 @@ export function Pricing() {
       name: "Premium",
       price: "$1,299",
       originalPrice: "$1,699",
-      features: ["Galería de 12 fotos", "Botón de catálogo/pago", "Prioridad en soporte", "Diseño avanzado"],
+      features: ["Galería de 12 fotos", "Personalización Total", "Botón de catálogo/pago", "Prioridad en soporte", "Diseño avanzado"],
       copy: "La herramienta definitiva para equipos de ventas y empresas serias",
       highlight: false
     }
