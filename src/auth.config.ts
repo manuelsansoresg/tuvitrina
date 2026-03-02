@@ -4,6 +4,8 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
+  secret: process.env.AUTH_SECRET, // Force explicit secret
+  debug: process.env.NODE_ENV === "development", // Enable debug logs in dev (or true for prod debugging)
   callbacks: {
     authorized({ auth, request: { nextUrl, cookies } }) {
       const isLoggedIn = !!auth?.user;
@@ -48,5 +50,19 @@ export const authConfig = {
   },
   providers: [], // Configured in auth.ts
   trustHost: true,
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
 } satisfies NextAuthConfig;
