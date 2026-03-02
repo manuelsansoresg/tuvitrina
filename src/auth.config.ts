@@ -5,7 +5,7 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request: { nextUrl, cookies } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
@@ -13,7 +13,8 @@ export const authConfig = {
       console.log("Middleware check:", { 
         path: nextUrl.pathname, 
         isLoggedIn, 
-        userId: auth?.user?.id 
+        userId: auth?.user?.id,
+        cookies: cookies.getAll().map((c: any) => c.name),
       });
 
       if (isOnDashboard) {
@@ -46,4 +47,6 @@ export const authConfig = {
     }
   },
   providers: [], // Configured in auth.ts
+  trustHost: true,
+  session: { strategy: "jwt" },
 } satisfies NextAuthConfig;
