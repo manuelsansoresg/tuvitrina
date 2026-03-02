@@ -38,5 +38,5 @@ export default async function AdminEditCardPage({ params }: { params: Promise<{ 
     limits: PLAN_LIMITS.PREMIUM, 
   };
 
-  return <DashboardClient data={data as any} targetUserId={targetUserId} />;
+  return <DashboardClient data={data as any} targetUserId={targetUserId} isSessionAdmin={true} />;
 }

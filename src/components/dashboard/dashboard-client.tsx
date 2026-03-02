@@ -515,12 +515,27 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                                           ))}
                                         </SelectContent>
                                       </Select>
-                                      <Input 
-                                          placeholder="https://..." 
-                                          value={link.url}
-                                          onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                                          className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono flex-1"
-                                      />
+                                      {link.icon === 'whatsapp' ? (
+                                        <div className="flex flex-1 items-center gap-2">
+                                            <span className="text-xs text-slate-500 font-mono whitespace-nowrap bg-slate-900/50 px-2 h-8 flex items-center rounded border border-slate-700">https://wa.me/</span>
+                                            <Input 
+                                                placeholder="521..." 
+                                                value={link.url.replace('https://wa.me/', '')}
+                                                onChange={(e) => {
+                                                    const cleanNumber = e.target.value.replace(/[^0-9]/g, '');
+                                                    handleLinkChange(index, "url", `https://wa.me/${cleanNumber}`);
+                                                }}
+                                                className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono flex-1"
+                                            />
+                                        </div>
+                                      ) : (
+                                        <Input 
+                                            placeholder="https://..." 
+                                            value={link.url}
+                                            onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                                            className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono flex-1"
+                                        />
+                                      )}
                                     </div>
                                 </div>
                                 <Button 
@@ -796,7 +811,12 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
                                return <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} />;
                             })()}
                          </div>
-                         <span className="font-medium text-slate-700 flex-1 text-left truncate">{link.label || "Enlace"}</span>
+                         <div className="flex-1 min-w-0">
+                             <p className="font-medium text-slate-700 truncate text-sm">{link.label || "Enlace"}</p>
+                             <p className="text-[10px] text-slate-400 truncate font-mono">
+                                {link.icon === 'whatsapp' ? link.url.replace('https://wa.me/', '+') : link.url}
+                             </p>
+                         </div>
                          <span className="text-slate-400">↗</span>
                       </div>
                      ))

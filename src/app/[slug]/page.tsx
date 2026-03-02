@@ -116,10 +116,15 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                {extendedCard.links.length > 0 ? (
                  extendedCard.links.map((link: any) => {
                    const IconComp = IconMap[link.icon || 'link'] || LinkIcon;
+                   // Si es whatsapp, asegurar formato wa.me
+                   const href = link.icon === 'whatsapp' && !link.url.startsWith('http') 
+                      ? `https://wa.me/${link.url.replace(/[^0-9]/g, '')}`
+                      : link.url;
+                      
                    return (
                      <a 
                        key={link.id} 
-                       href={link.url} 
+                       href={href} 
                        target="_blank" 
                        rel="noopener noreferrer" 
                        className="block p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-blue-500 hover:shadow-md transition-all flex items-center gap-3 group"
