@@ -40,5 +40,5 @@ export default async function DashboardPage({
     return <div>Error al cargar datos del usuario.</div>;
   }
 
-  return <DashboardClient data={data as any} />;
+  return <DashboardClient data={data as any} isSessionAdmin={session.user.role === Role.ADMIN} />;
 }

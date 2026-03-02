@@ -3,6 +3,10 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import { checkSubscriptionStatus } from "@/actions/subscription"
 import { GalleryViewer } from "@/components/gallery-viewer";
+import { 
+  Link as LinkIcon, Facebook, Instagram, Twitter, Linkedin, 
+  Youtube, MessageCircle, Mail, Phone, Globe, MapPin 
+} from "lucide-react";
 
 export default async function CardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -39,6 +43,20 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
        </div>
      )
   }
+
+  const IconMap: any = {
+      whatsapp: MessageCircle,
+      instagram: Instagram,
+      facebook: Facebook,
+      twitter: Twitter,
+      linkedin: Linkedin,
+      youtube: Youtube,
+      email: Mail,
+      phone: Phone,
+      website: Globe,
+      map: MapPin,
+      link: LinkIcon
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center">
@@ -97,6 +115,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <div className="space-y-3 mb-8">
                {extendedCard.links.length > 0 ? (
                  extendedCard.links.map((link: any) => {
+                   const IconComp = IconMap[link.icon || 'link'] || LinkIcon;
                    return (
                      <a 
                        key={link.id} 
@@ -106,8 +125,8 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                        className="block p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-blue-500 hover:shadow-md transition-all flex items-center gap-3 group"
                        style={{ borderColor: extendedCard.themeColor ? `${extendedCard.themeColor}40` : undefined }}
                      >
-                       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-colors">
-                          <span className="text-lg">🔗</span>
+                       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-colors text-slate-700">
+                          <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} />
                        </div>
                        <span 
                          className="font-medium flex-1 text-left"

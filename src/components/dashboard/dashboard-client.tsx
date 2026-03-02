@@ -11,8 +11,15 @@ import {
   Loader2, Plus, Trash, GripVertical, Image as ImageIcon, 
   MapPin, Link as LinkIcon, Save, Eye, Smartphone, 
   LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft,
-  Info
+  Info, Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Mail, Phone, Globe
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useFormStatus } from "react-dom";
 import { slugify } from "@/lib/utils";
 import { PlanType, Role, BusinessCard, Link as LinkModel, GalleryImage, Product } from "@prisma/client";
@@ -38,9 +45,24 @@ interface DashboardClientProps {
     limits?: typeof PLAN_LIMITS.EXPRESS;
   };
   targetUserId?: string;
+  isSessionAdmin?: boolean;
 }
 
-export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
+const LINK_ICONS = [
+  { value: "link", label: "Enlace", icon: LinkIcon },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { value: "instagram", label: "Instagram", icon: Instagram },
+  { value: "facebook", label: "Facebook", icon: Facebook },
+  { value: "twitter", label: "Twitter", icon: Twitter },
+  { value: "linkedin", label: "LinkedIn", icon: Linkedin },
+  { value: "youtube", label: "YouTube", icon: Youtube },
+  { value: "email", label: "Email", icon: Mail },
+  { value: "phone", label: "Teléfono", icon: Phone },
+  { value: "map", label: "Mapa", icon: MapPin },
+  { value: "website", label: "Sitio Web", icon: Globe },
+];
+
+export function DashboardClient({ data, targetUserId, isSessionAdmin }: DashboardClientProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("info");
   const [isPending, startTransition] = useTransition();
@@ -67,7 +89,8 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
 
   const currentPlan = data.user.plan as PlanType; // Ensure type safety
   const limits = data.limits || PLAN_LIMITS[currentPlan] || PLAN_LIMITS.EXPRESS;
-  const isAdmin = data.user.role === Role.ADMIN;
+  // Use session admin status if provided, otherwise fallback to user role (only valid for own profile)
+  const isAdmin = isSessionAdmin ?? (data.user.role === Role.ADMIN);
 
   const handlePreviewChange = (field: string, value: any) => {
     setPreviewData(prev => prev ? ({ ...prev, [field]: value }) : null);
@@ -470,15 +493,34 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                                     className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500"
                                     />
                                     <div className="flex items-center gap-2">
-                                    <div className="p-1.5 rounded bg-slate-900 border border-slate-700 text-slate-500">
-                                        <LinkIcon size={12} />
-                                    </div>
-                                    <Input 
-                                        placeholder="https://..." 
-                                        value={link.url}
-                                        onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-                                        className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono"
-                                    />
+                                      <Select 
+                                        value={link.icon || "link"} 
+                                        onValueChange={(val) => handleLinkChange(index, "icon", val)}
+                                      >
+                                        <SelectTrigger className="w-[50px] h-8 p-0 flex items-center justify-center bg-slate-900 border-slate-700 text-slate-500 focus:border-blue-500 shrink-0">
+                                          {(() => {
+                                              const selectedIcon = LINK_ICONS.find(i => i.value === (link.icon || "link")) || LINK_ICONS[0];
+                                              const IconComp = selectedIcon.icon;
+                                              return <IconComp size={14} />;
+                                          })()}
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-900 border-slate-700 max-h-[200px]">
+                                          {LINK_ICONS.map((iconOption) => (
+                                            <SelectItem key={iconOption.value} value={iconOption.value} className="text-slate-200 focus:bg-slate-800 focus:text-white cursor-pointer">
+                                              <div className="flex items-center gap-2">
+                                                <iconOption.icon size={14} className="text-slate-400" />
+                                                <span className="text-xs">{iconOption.label}</span>
+                                              </div>
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <Input 
+                                          placeholder="https://..." 
+                                          value={link.url}
+                                          onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                                          className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono flex-1"
+                                      />
                                     </div>
                                 </div>
                                 <Button 
@@ -748,8 +790,11 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                      links.map((link: any, index: number) => (
                       <div key={index} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 shadow-sm">
                          <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-700">
-                            {/* Generic icon for preview */}
-                            <span className="text-lg">🔗</span>
+                            {(() => {
+                               const iconObj = LINK_ICONS.find(i => i.value === link.icon) || LINK_ICONS[0];
+                               const IconComp = iconObj.icon;
+                               return <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} />;
+                            })()}
                          </div>
                          <span className="font-medium text-slate-700 flex-1 text-left truncate">{link.label || "Enlace"}</span>
                          <span className="text-slate-400">↗</span>
