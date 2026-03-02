@@ -290,7 +290,7 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                formData.append("galleryPriceColor", previewData.galleryPriceColor || "");
             }
 
-            const result = await updateBusinessCard(formData);
+            const result = await updateBusinessCard(null, formData);
             if (result.success) {
               toast({ description: "Cambios guardados correctamente" });
             } else {
@@ -419,219 +419,7 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                   </div>
 
                 </div>
-              </div>
-            )}
 
-            {activeTab === "diseno" && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
-                    {!limits.allowThemeColor && <LockBadge />}
-                  </div>
-
-                  {!limits.allowThemeColor && (
-                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
-                      <Lock size={16} className="text-yellow-500" />
-                      <span>Actualiza a plan Emprendedor o Premium para personalizar todos los colores y fondos.</span>
-                    </div>
-                  )}
-                  
-                  {/* Background Color & Image */}
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <Label className="text-slate-300">Fondo de la Tarjeta</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Color de Fondo" 
-                              value={previewData?.cardBackgroundColor || "#ffffff"} 
-                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)}
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Imagen (Mosaico)</Label>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group shrink-0">
-                                    {previewData?.cardBackgroundImage ? (
-                                        <img src={previewData.cardBackgroundImage} alt="Bg" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <ImageIcon className="h-4 w-4 text-slate-500" />
-                                    )}
-                                    <label className={`absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${!limits.allowThemeColor ? 'hidden' : ''}`}>
-                                        <Upload className="h-4 w-4 text-white" />
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} disabled={!limits.allowThemeColor} />
-                                    </label>
-                                </div>
-                                {previewData?.cardBackgroundImage ? (
-                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} disabled={!limits.allowThemeColor} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
-                                        <Trash size={12} className="mr-1" /> Eliminar
-                                    </Button>
-                                ) : (
-                                    <span className="text-xs text-slate-500">Subir imagen</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-800"></div>
-
-                  {/* Text Colors */}
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                     <Label className="text-slate-300">Colores de Texto</Label>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Título Principal" 
-                              value={previewData?.titleColor || "#0f172a"} 
-                              onChange={(val) => handlePreviewChange("titleColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Descripción" 
-                              value={previewData?.descriptionColor || "#64748b"} 
-                              onChange={(val) => handlePreviewChange("descriptionColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-                     </div>
-                  </div>
-
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "diseno" && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
-                    {!limits.allowThemeColor && <LockBadge />}
-                  </div>
-
-                  {!limits.allowThemeColor && (
-                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
-                      <Lock size={16} className="text-yellow-500" />
-                      <span>Actualiza a plan Emprendedor o Premium para personalizar todos los colores y fondos.</span>
-                    </div>
-                  )}
-                  
-                  {/* Background Color & Image */}
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <Label className="text-slate-300">Fondo de la Tarjeta</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Color de Fondo" 
-                              value={previewData?.cardBackgroundColor || "#ffffff"} 
-                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)}
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Imagen (Mosaico)</Label>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group shrink-0">
-                                    {previewData?.cardBackgroundImage ? (
-                                        <img src={previewData.cardBackgroundImage} alt="Bg" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <ImageIcon className="h-4 w-4 text-slate-500" />
-                                    )}
-                                    <label className={`absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${!limits.allowThemeColor ? 'hidden' : ''}`}>
-                                        <Upload className="h-4 w-4 text-white" />
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} disabled={!limits.allowThemeColor} />
-                                    </label>
-                                </div>
-                                {previewData?.cardBackgroundImage ? (
-                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} disabled={!limits.allowThemeColor} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
-                                        <Trash size={12} className="mr-1" /> Eliminar
-                                    </Button>
-                                ) : (
-                                    <span className="text-xs text-slate-500">Subir imagen</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-800"></div>
-
-                  {/* Text Colors */}
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                     <Label className="text-slate-300">Colores de Texto</Label>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Título Principal" 
-                              value={previewData?.titleColor || "#0f172a"} 
-                              onChange={(val) => handlePreviewChange("titleColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Descripción" 
-                              value={previewData?.descriptionColor || "#64748b"} 
-                              onChange={(val) => handlePreviewChange("descriptionColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="border-t border-slate-800"></div>
-
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                     <Label className="text-slate-300">Estilo de Galería</Label>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Color de Títulos" 
-                              value={previewData?.galleryTitleColor || "#ffffff"} 
-                              onChange={(val) => handlePreviewChange("galleryTitleColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <ColorPicker 
-                              label="Color de Precios" 
-                              value={previewData?.galleryPriceColor || "#4ade80"} 
-                              onChange={(val) => handlePreviewChange("galleryPriceColor", val)} 
-                              disabled={!limits.allowThemeColor}
-                            />
-                        </div>
-                     </div>
-                  </div>
-                  
-                  <div className="border-t border-slate-800"></div>
-
-                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-slate-300 flex items-center gap-2">
-                        <Palette size={16} /> Color de Acento (Tema)
-                      </Label>
-                    </div>
-                    
-                    <div className="max-w-[200px]">
-                      <ColorPicker 
-                        value={previewData?.themeColor || "#000000"} 
-                        onChange={(val) => handlePreviewChange("themeColor", val)} 
-                        disabled={!limits.allowThemeColor}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
                   {/* Links Section */}
                   <div className="space-y-4">
@@ -765,6 +553,134 @@ export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
                        )}
                     </div>
                   </div>
+                </div>
+            )}
+
+            {activeTab === "diseno" && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
+                    {!limits.allowThemeColor && <LockBadge />}
+                  </div>
+
+                  {!limits.allowThemeColor && (
+                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
+                      <Lock size={16} className="text-yellow-500" />
+                      <span>Actualiza a plan Emprendedor o Premium para personalizar todos los colores y fondos.</span>
+                    </div>
+                  )}
+                  
+                  {/* Background Color & Image */}
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <Label className="text-slate-300">Fondo de la Tarjeta</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Fondo" 
+                              value={previewData?.cardBackgroundColor || "#ffffff"} 
+                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)}
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs text-slate-400">Imagen (Mosaico)</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group shrink-0">
+                                    {previewData?.cardBackgroundImage ? (
+                                        <img src={previewData.cardBackgroundImage} alt="Bg" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <ImageIcon className="h-4 w-4 text-slate-500" />
+                                    )}
+                                    <label className={`absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${!limits.allowThemeColor ? 'hidden' : ''}`}>
+                                        <Upload className="h-4 w-4 text-white" />
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} disabled={!limits.allowThemeColor} />
+                                    </label>
+                                </div>
+                                {previewData?.cardBackgroundImage ? (
+                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} disabled={!limits.allowThemeColor} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                                        <Trash size={12} className="mr-1" /> Eliminar
+                                    </Button>
+                                ) : (
+                                    <span className="text-xs text-slate-500">Subir imagen</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-800"></div>
+
+                  {/* Text Colors */}
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                     <Label className="text-slate-300">Colores de Texto</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Título Principal" 
+                              value={previewData?.titleColor || "#0f172a"} 
+                              onChange={(val) => handlePreviewChange("titleColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Descripción" 
+                              value={previewData?.descriptionColor || "#64748b"} 
+                              onChange={(val) => handlePreviewChange("descriptionColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="border-t border-slate-800"></div>
+
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                     <Label className="text-slate-300">Estilo de Galería</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Títulos" 
+                              value={previewData?.galleryTitleColor || "#ffffff"} 
+                              onChange={(val) => handlePreviewChange("galleryTitleColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Precios" 
+                              value={previewData?.galleryPriceColor || "#4ade80"} 
+                              onChange={(val) => handlePreviewChange("galleryPriceColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div className="border-t border-slate-800"></div>
+
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-slate-300 flex items-center gap-2">
+                        <Palette size={16} /> Color de Acento (Tema)
+                      </Label>
+                    </div>
+                    
+                    <div className="max-w-[200px]">
+                      <ColorPicker 
+                        value={previewData?.themeColor || "#000000"} 
+                        onChange={(val) => handlePreviewChange("themeColor", val)} 
+                        disabled={!limits.allowThemeColor}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Other tabs would go here */}
             {activeTab === "productos" && (
