@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getDashboardData } from "@/actions/dashboard";
-import DashboardClient from "@/components/dashboard/dashboard-client";
+import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {

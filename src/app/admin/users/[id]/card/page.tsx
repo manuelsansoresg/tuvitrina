@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { Role, PlanType } from "@prisma/client";
-import DashboardClient from "@/components/dashboard/dashboard-client";
+import { DashboardClient } from "@/components/dashboard/dashboard-client";
 
 export default async function AdminEditCardPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();

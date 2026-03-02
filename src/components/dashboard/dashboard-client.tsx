@@ -23,55 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { slugify } from "@/lib/utils";
+import { PlanType, Role, BusinessCard, Link as LinkModel, GalleryImage, Product } from "@prisma/client";
+import { PLAN_LIMITS } from "@/lib/constants";
 
-// Local type definitions to handle potential missing Prisma types during dev
-interface Product {
-  id: string;
-  title: string;
-  price: number;
-  imageUrl?: string | null;
-  description?: string | null;
-  active: boolean;
-}
-
-type PlanType = "FREE" | "EMPRENDEDOR" | "EMPRESARIO";
-
-type ExtendedBusinessCard = {
-  id: string;
-  slug: string;
-  logoUrl?: string | null;
-  bannerUrl?: string | null;
-  title: string;
-  description?: string | null;
-  themeColor?: string | null;
-  location?: string | null;
-  active: boolean;
-  cardBackgroundColor?: string | null;
-  cardBackgroundImage?: string | null;
-  titleColor?: string | null;
-  descriptionColor?: string | null;
-  galleryTitleColor?: string | null;
-  galleryPriceColor?: string | null;
+// Extended types including relations
+interface ExtendedBusinessCard extends BusinessCard {
   links: LinkModel[];
   gallery: GalleryImage[];
   products: Product[];
-};
-
-type LinkModel = {
-  id: string;
-  label: string;
-  url: string;
-  active: boolean;
-  order: number;
-};
-
-type GalleryImage = {
-  id: string;
-  imageUrl: string;
-  title?: string | null;
-  price?: string | null;
-  order: number;
-};
+}
 
 interface DashboardClientProps {
   data: {
@@ -82,10 +42,12 @@ interface DashboardClientProps {
       plan: PlanType;
       businessCard: ExtendedBusinessCard | null;
     };
+    limits?: typeof PLAN_LIMITS.EXPRESS;
   };
+  targetUserId?: string;
 }
 
-export function DashboardClient({ data }: DashboardClientProps) {
+export function DashboardClient({ data, targetUserId }: DashboardClientProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("contenido");
   const [isPending, startTransition] = useTransition();
@@ -110,36 +72,8 @@ export function DashboardClient({ data }: DashboardClientProps) {
     data.user.businessCard?.products || []
   );
 
-  // Plan limits based on constants
-  const PLAN_LIMITS = {
-    FREE: {
-      links: 3,
-      gallery: 3,
-      products: 0, // No products in free plan
-      allowThemeColor: false,
-      allowLocation: false,
-      maxSlugLength: 30,
-    },
-    EMPRENDEDOR: {
-      links: 10,
-      gallery: 10,
-      products: 5,
-      allowThemeColor: true,
-      allowLocation: true,
-      maxSlugLength: 50,
-    },
-    EMPRESARIO: {
-      links: 99,
-      gallery: 99,
-      products: 99, // Unlimited
-      allowThemeColor: true,
-      allowLocation: true,
-      maxSlugLength: 100,
-    }
-  };
-
   const currentPlan = data.user.plan as PlanType; // Ensure type safety
-  const limits = PLAN_LIMITS[currentPlan] || PLAN_LIMITS.FREE;
+  const limits = data.limits || PLAN_LIMITS[currentPlan] || PLAN_LIMITS.EXPRESS;
 
   const handlePreviewChange = (field: string, value: any) => {
     setPreviewData(prev => prev ? ({ ...prev, [field]: value }) : null);
@@ -233,7 +167,86 @@ export function DashboardClient({ data }: DashboardClientProps) {
     }
   };
 
-  // ... (Link and Gallery handlers would go here, simplified for brevity)
+  const handleAddLink = () => {
+    if (links.length >= limits.links) {
+       toast({
+         variant: "destructive",
+         title: "Límite alcanzado",
+         description: `Tu plan permite máximo ${limits.links} enlaces.`,
+       });
+       return;
+    }
+    setLinks([...links, { 
+       id: crypto.randomUUID(), 
+       label: "", 
+       url: "", 
+       order: links.length,
+       icon: "link",
+       cardId: data.user.businessCard?.id || ""
+     }]);
+   };
+
+  const handleRemoveLink = (index: number) => {
+    const newLinks = [...links];
+    newLinks.splice(index, 1);
+    setLinks(newLinks);
+  };
+
+  const handleLinkChange = (index: number, field: keyof LinkModel, value: any) => {
+    const newLinks = [...links];
+    newLinks[index] = { ...newLinks[index], [field]: value };
+    setLinks(newLinks);
+  };
+
+  const handleAddGalleryImage = () => {
+     if (gallery.length >= limits.galleryImages) {
+       toast({
+         variant: "destructive",
+         title: "Límite alcanzado",
+         description: `Tu plan permite máximo ${limits.galleryImages} imágenes.`,
+       });
+       return;
+    }
+    document.getElementById('gallery-upload')?.click();
+  };
+
+  const handleGalleryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+       if (file.size > 4 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "Archivo muy grande",
+          description: "La imagen no debe superar los 4MB",
+        });
+        return;
+      }
+      
+      const resized = await resizeImage(file, 800);
+      setGallery([...gallery, { 
+        id: crypto.randomUUID(), 
+        imageUrl: resized, 
+        order: gallery.length,
+        title: null,
+        price: null,
+        cardId: data.user.businessCard?.id || ""
+      }]);
+    }
+    e.target.value = '';
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    const newGallery = [...gallery];
+    newGallery.splice(index, 1);
+    setGallery(newGallery);
+  };
+  
+  const handleGalleryImageChange = (index: number, field: keyof GalleryImage, value: any) => {
+    const newGallery = [...gallery];
+    newGallery[index] = { ...newGallery[index], [field]: value };
+    setGallery(newGallery);
+  };
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-slate-950 text-slate-200">
@@ -489,6 +502,91 @@ export function DashboardClient({ data }: DashboardClientProps) {
                      </div>
                   </div>
 
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "diseno" && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-white">Personalización Visual</h3>
+                    {!limits.allowThemeColor && <LockBadge />}
+                  </div>
+
+                  {!limits.allowThemeColor && (
+                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-800 text-sm text-slate-400 flex items-center gap-3">
+                      <Lock size={16} className="text-yellow-500" />
+                      <span>Actualiza a plan Emprendedor o Premium para personalizar todos los colores y fondos.</span>
+                    </div>
+                  )}
+                  
+                  {/* Background Color & Image */}
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <Label className="text-slate-300">Fondo de la Tarjeta</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Color de Fondo" 
+                              value={previewData?.cardBackgroundColor || "#ffffff"} 
+                              onChange={(val) => handlePreviewChange("cardBackgroundColor", val)}
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs text-slate-400">Imagen (Mosaico)</Label>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group shrink-0">
+                                    {previewData?.cardBackgroundImage ? (
+                                        <img src={previewData.cardBackgroundImage} alt="Bg" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <ImageIcon className="h-4 w-4 text-slate-500" />
+                                    )}
+                                    <label className={`absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${!limits.allowThemeColor ? 'hidden' : ''}`}>
+                                        <Upload className="h-4 w-4 text-white" />
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleBackgroundImageUpload} disabled={!limits.allowThemeColor} />
+                                    </label>
+                                </div>
+                                {previewData?.cardBackgroundImage ? (
+                                    <Button size="sm" variant="ghost" onClick={() => handlePreviewChange("cardBackgroundImage", null)} disabled={!limits.allowThemeColor} className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                                        <Trash size={12} className="mr-1" /> Eliminar
+                                    </Button>
+                                ) : (
+                                    <span className="text-xs text-slate-500">Subir imagen</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-800"></div>
+
+                  {/* Text Colors */}
+                  <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
+                     <Label className="text-slate-300">Colores de Texto</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Título Principal" 
+                              value={previewData?.titleColor || "#0f172a"} 
+                              onChange={(val) => handlePreviewChange("titleColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <ColorPicker 
+                              label="Descripción" 
+                              value={previewData?.descriptionColor || "#64748b"} 
+                              onChange={(val) => handlePreviewChange("descriptionColor", val)} 
+                              disabled={!limits.allowThemeColor}
+                            />
+                        </div>
+                     </div>
+                  </div>
+
                   <div className="border-t border-slate-800"></div>
 
                   <div className={`space-y-4 ${!limits.allowThemeColor ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -534,6 +632,139 @@ export function DashboardClient({ data }: DashboardClientProps) {
                 </div>
               </div>
             )}
+
+                  {/* Links Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                       <Label className="text-slate-300">Enlaces ({links.length}/{limits.links})</Label>
+                       <Button 
+                         type="button" 
+                         variant="outline" 
+                         size="sm" 
+                         onClick={handleAddLink}
+                         className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
+                       >
+                         <Plus size={14} className="mr-1" /> Agregar
+                       </Button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                       {links.map((link, index) => (
+                          <div key={link.id} className="group p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                             <div className="cursor-move text-slate-600 hover:text-slate-400">
+                                <GripVertical size={16} />
+                             </div>
+                             <div className="flex-1 space-y-2">
+                                <Input 
+                                   placeholder="Título del enlace" 
+                                   value={link.label}
+                                   onChange={(e) => handleLinkChange(index, "label", e.target.value)}
+                                   className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500"
+                                />
+                                <div className="flex items-center gap-2">
+                                   <div className="p-1.5 rounded bg-slate-900 border border-slate-700 text-slate-500">
+                                      <LinkIcon size={12} />
+                                   </div>
+                                   <Input 
+                                      placeholder="https://..." 
+                                      value={link.url}
+                                      onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                                      className="h-8 text-xs bg-slate-900 border-slate-700 focus:border-blue-500 font-mono"
+                                   />
+                                </div>
+                             </div>
+                             <Button 
+                               type="button" 
+                               variant="ghost" 
+                               size="icon" 
+                               onClick={() => handleRemoveLink(index)}
+                               className="h-8 w-8 text-slate-500 hover:text-red-400 hover:bg-red-900/20"
+                             >
+                                <Trash size={14} />
+                             </Button>
+                          </div>
+                       ))}
+                       
+                       {links.length === 0 && (
+                          <div className="text-center p-6 border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
+                             <p className="text-xs text-slate-500 mb-2">No tienes enlaces agregados</p>
+                             <Button type="button" variant="link" size="sm" onClick={handleAddLink} className="text-blue-400 h-auto p-0 text-xs">
+                                Agregar el primero
+                             </Button>
+                          </div>
+                       )}
+                    </div>
+                  </div>
+
+                  {/* Gallery Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                       <Label className="text-slate-300">Galería ({gallery.length}/{limits.galleryImages})</Label>
+                       <Button 
+                         type="button" 
+                         variant="outline" 
+                         size="sm" 
+                         onClick={handleAddGalleryImage}
+                         className="h-8 text-xs border-dashed border-slate-600 hover:border-blue-500 hover:text-blue-400"
+                       >
+                         <Plus size={14} className="mr-1" /> Agregar Imagen
+                       </Button>
+                       <input 
+                          type="file" 
+                          id="gallery-upload" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleGalleryImageUpload}
+                       />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                       {gallery.map((img, index) => (
+                          <div key={img.id} className="relative group bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                             <div className="aspect-square relative">
+                                <img src={img.imageUrl} alt="Gallery" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                   <Button 
+                                      type="button" 
+                                      variant="destructive" 
+                                      size="icon" 
+                                      className="h-8 w-8 rounded-full"
+                                      onClick={() => handleRemoveGalleryImage(index)}
+                                   >
+                                      <Trash size={14} />
+                                   </Button>
+                                </div>
+                             </div>
+                             <div className="p-2 space-y-2 bg-slate-900/50">
+                                <Input 
+                                   placeholder="Título (opcional)" 
+                                   value={img.title || ""} 
+                                   onChange={(e) => handleGalleryImageChange(index, "title", e.target.value)}
+                                   className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
+                                />
+                                <Input 
+                                   type="number"
+                                   placeholder="Precio (opcional)" 
+                                   value={img.price || ""} 
+                                   onChange={(e) => handleGalleryImageChange(index, "price", e.target.value)}
+                                   className="h-7 text-[10px] bg-slate-950 border-slate-800 focus:border-blue-500 px-2"
+                                />
+                             </div>
+                          </div>
+                       ))}
+                       
+                       {gallery.length < limits.galleryImages && (
+                          <button 
+                             type="button"
+                             onClick={handleAddGalleryImage}
+                             className="aspect-square rounded-lg border-2 border-dashed border-slate-800 bg-slate-900/30 hover:bg-slate-800 hover:border-slate-700 transition-all flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-slate-300"
+                          >
+                             <Plus size={24} />
+                             <span className="text-xs">Agregar</span>
+                          </button>
+                       )}
+                    </div>
+                  </div>
 
             {/* Other tabs would go here */}
             {activeTab === "productos" && (
