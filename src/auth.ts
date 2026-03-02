@@ -10,6 +10,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  trustHost: true, // Crucial para Vercel/Production
   providers: [
     Credentials({
       async authorize(credentials) {
