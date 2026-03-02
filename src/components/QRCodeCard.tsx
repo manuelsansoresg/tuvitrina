@@ -40,19 +40,22 @@ export function QRCodeCard({ url, logoUrl, title }: QRCodeCardProps) {
       // Create a canvas from the QR container
       const canvas = await html2canvas(qrRef.current, {
         backgroundColor: "#ffffff",
-        scale: 2, // Higher resolution
+        scale: 3, // Higher resolution
         logging: false,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false, // Must be false for toDataURL to work
       });
       
-      const dataUrl = canvas.toDataURL("image/png");
+      const dataUrl = canvas.toDataURL("image/png", 1.0);
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = `qr-${title?.replace(/\s+/g, '-').toLowerCase() || 'card'}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error("Error downloading QR:", error);
+      alert("Error al descargar la imagen. Intenta de nuevo.");
     } finally {
       setIsDownloading(false);
     }
