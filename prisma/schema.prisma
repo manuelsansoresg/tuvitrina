@@ -39,6 +39,7 @@ model BusinessCard {
   id          String   @id @default(cuid())
   slug        String   @unique
   logoUrl     String?
+  bannerUrl   String?
   title       String
   description String?
   themeColor  String?  @default("#000000")

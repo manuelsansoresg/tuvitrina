@@ -62,6 +62,7 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   }
 
   const logoUrl = formData.get("logoUrl") as string;
+  const bannerUrl = formData.get("bannerUrl") as string;
   const linksJson = formData.get("links") as string;
   const galleryJson = formData.get("gallery") as string;
 
@@ -83,6 +84,7 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
           location: finalLocation,
           slug,
           logoUrl,
+          bannerUrl,
         },
       });
 

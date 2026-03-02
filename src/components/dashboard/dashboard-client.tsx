@@ -138,6 +138,18 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
     }
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const resized = await resizeImage(file, 1200, 0.8);
+        handlePreviewChange("bannerUrl", resized);
+      } catch (err) {
+        console.error("Error resizing banner:", err);
+      }
+    }
+  };
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -294,6 +306,7 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                   <input type="hidden" name="location" value={previewData?.location || ""} />
                   <input type="hidden" name="slug" value={previewData?.slug || ""} />
                   <input type="hidden" name="logoUrl" value={previewData?.logoUrl || ""} />
+                  <input type="hidden" name="bannerUrl" value={previewData?.bannerUrl || ""} />
                   <input type="hidden" name="links" value={JSON.stringify(links)} />
                   <input type="hidden" name="gallery" value={JSON.stringify(previewData?.gallery || [])} />
                   
@@ -375,6 +388,27 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                     <div className="text-sm text-slate-400">
                         <p>Sube tu logo en formato PNG o JPG.</p>
                         <p className="text-xs mt-1">Recomendado: 500x500px</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Imagen de Portada (Banner)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-20 w-full max-w-[300px] rounded-lg border border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden relative group">
+                        {previewData?.bannerUrl ? (
+                            <img src={previewData.bannerUrl} alt="Banner" className="h-full w-full object-cover" />
+                        ) : (
+                            <ImageIcon className="h-8 w-8 text-slate-500" />
+                        )}
+                        <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                            <Upload className="h-6 w-6 text-white" />
+                            <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+                        </label>
+                    </div>
+                    <div className="text-sm text-slate-400">
+                        <p>Aparece en la parte superior de tu tarjeta.</p>
+                        <p className="text-xs mt-1">Recomendado: 1200x400px</p>
                     </div>
                   </div>
                 </div>
@@ -680,7 +714,13 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
           <div className="w-full h-full bg-white overflow-y-auto custom-scrollbar relative" style={{ backgroundColor: '#ffffff' }}>
              
              {/* Hero Banner */}
-             <div className="h-40 relative flex items-center justify-center transition-colors duration-300" style={{ backgroundColor: previewData?.themeColor || '#000000' }}>
+             <div 
+               className="h-40 relative flex items-center justify-center transition-colors duration-300 bg-cover bg-center bg-no-repeat" 
+               style={{ 
+                 backgroundColor: previewData?.themeColor || '#000000',
+                 backgroundImage: previewData?.bannerUrl ? `url(${previewData.bannerUrl})` : undefined
+               }}
+             >
                 <div className="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg absolute -bottom-12 flex items-center justify-center text-3xl font-bold text-slate-800 overflow-hidden">
                    {previewData?.logoUrl ? (
                       <img src={previewData.logoUrl} alt="Logo" className="w-full h-full object-cover" />

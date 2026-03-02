@@ -38,8 +38,11 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
          
          {/* Hero Banner */}
          <div 
-            className="h-40 relative flex items-center justify-center" 
-            style={{ backgroundColor: card.themeColor || '#000000' }}
+            className="h-40 relative flex items-center justify-center bg-cover bg-center bg-no-repeat" 
+            style={{ 
+              backgroundColor: card.themeColor || '#000000',
+              backgroundImage: card.bannerUrl ? `url(${card.bannerUrl})` : undefined
+            }}
          >
             <div className="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg absolute -bottom-12 flex items-center justify-center text-3xl font-bold text-slate-800 overflow-hidden z-10">
                {card.logoUrl ? (
