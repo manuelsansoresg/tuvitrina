@@ -8,7 +8,7 @@ export function Navbar({ user }: { user?: any }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50 rounded-full border border-white/10 bg-slate-900/60 backdrop-blur-md shadow-lg">
+    <nav className="fixed top-16 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50 rounded-full border border-white/10 bg-slate-900/60 backdrop-blur-md shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Logo */}
         <a href="#" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-start to-primary-end">

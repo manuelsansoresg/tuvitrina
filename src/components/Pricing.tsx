@@ -31,13 +31,15 @@ export function Pricing() {
     {
       name: "Express",
       price: "$399",
-      features: ["1 foto perfil", "Botones de contacto", "QR personalizado", "WhatsApp directo"],
+      originalPrice: "$499",
+      features: ["1 foto perfil", "Imagen de portada", "Botones de contacto", "QR personalizado", "WhatsApp directo"],
       copy: "Ideal para no perder ni un prospecto en eventos",
       highlight: false
     },
     {
       name: "Emprendedor",
       price: "$799",
+      originalPrice: "$999",
       features: ["Galería de 3-5 fotos", "Diseño de marca", "Ubicación Maps", "Todo lo del Express"],
       copy: "Muestra tus mejores productos mientras te contactan",
       highlight: true
@@ -45,6 +47,7 @@ export function Pricing() {
     {
       name: "Premium",
       price: "$1,299",
+      originalPrice: "$1,699",
       features: ["Galería de 12 fotos", "Botón de catálogo/pago", "Prioridad en soporte", "Diseño avanzado"],
       copy: "La herramienta definitiva para equipos de ventas y empresas serias",
       highlight: false
@@ -99,9 +102,15 @@ export function Pricing() {
             <h3 className={`text-2xl font-bold mb-2 ${plan.highlight ? "text-secondary" : "text-white"}`}>
               {plan.name}
             </h3>
-            <div className="text-4xl font-bold mb-4 text-white">
-              {plan.price}
-              <span className="text-lg text-slate-500 font-normal ml-1">MXN</span>
+            
+            <div className="flex flex-col mb-4">
+              <span className="text-sm text-slate-500 line-through decoration-slate-500/50 mb-0.5 ml-1">
+                {plan.originalPrice} MXN
+              </span>
+              <div className="text-4xl font-bold text-white leading-none">
+                {plan.price}
+                <span className="text-lg text-slate-500 font-normal ml-1">MXN</span>
+              </div>
             </div>
             
             <p className="text-slate-400 mb-6 text-sm min-h-[40px] italic">

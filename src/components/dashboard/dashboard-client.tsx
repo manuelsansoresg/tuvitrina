@@ -279,7 +279,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
             if (result.success) {
               toast({ description: "Cambios guardados correctamente" });
             } else {
-              toast({ variant: "destructive", description: result.error });
+              toast({ variant: "destructive", description: result.message });
             }
           }} className="space-y-8 max-w-2xl mx-auto pb-20">
             
@@ -551,10 +551,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
         
-        <div className="relative w-[375px] h-[750px] bg-black rounded-[40px] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col transform transition-transform hover:scale-[1.01] duration-500">
-           {/* Dynamic Island / Notch Removed */}
-           {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-20"></div> */}
-           
+        <div className="relative w-[375px] h-[750px] bg-slate-950 rounded-[40px] border-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col transform transition-transform hover:scale-[1.01] duration-500">
            {/* Screen Content */}
            <div className="w-full h-full bg-white overflow-y-auto custom-scrollbar relative" style={{ backgroundColor: '#ffffff' }}>
              
