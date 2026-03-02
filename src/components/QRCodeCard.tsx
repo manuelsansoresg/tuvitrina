@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { useState, useRef, useEffect } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 import { Download, Share2 } from "lucide-react";
-import html2canvas from "html2canvas";
 
 interface QRCodeCardProps {
   url: string;
@@ -14,6 +13,36 @@ interface QRCodeCardProps {
 export function QRCodeCard({ url, logoUrl, title }: QRCodeCardProps) {
   const qrRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [qrLogo, setQrLogo] = useState<string | undefined>(undefined);
+
+  // Pre-load logo as Base64 to avoid CORS issues
+  useEffect(() => {
+    if (logoUrl) {
+      // If it's already a data URL, use it directly
+      if (logoUrl.startsWith('data:')) {
+        setQrLogo(logoUrl);
+        return;
+      }
+
+      // Try to fetch and convert
+      fetch(logoUrl)
+        .then(response => response.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setQrLogo(reader.result as string);
+          };
+          reader.readAsDataURL(blob);
+        })
+        .catch(() => {
+          // If fetch fails (CORS), fall back to original URL
+          // It might still work if the server allows cross-origin image loading
+          setQrLogo(logoUrl);
+        });
+    } else {
+      setQrLogo(undefined);
+    }
+  }, [logoUrl]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -32,33 +61,32 @@ export function QRCodeCard({ url, logoUrl, title }: QRCodeCardProps) {
     }
   };
 
-  const handleDownload = async () => {
-    if (!qrRef.current) return;
-    
+  const handleDownload = () => {
     setIsDownloading(true);
-    try {
-      // Create a canvas from the QR container
-      const canvas = await html2canvas(qrRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 3, // Higher resolution
-        logging: false,
-        useCORS: true,
-        allowTaint: false, // Must be false for toDataURL to work
-      });
-      
-      const dataUrl = canvas.toDataURL("image/png", 1.0);
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = `qr-${title?.replace(/\s+/g, '-').toLowerCase() || 'card'}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading QR:", error);
-      alert("Error al descargar la imagen. Intenta de nuevo.");
-    } finally {
-      setIsDownloading(false);
-    }
+    
+    // Small delay to ensure UI updates
+    setTimeout(() => {
+        try {
+            const canvas = qrRef.current?.querySelector('canvas');
+            if (canvas) {
+                // Create a temporary link to download
+                const dataUrl = canvas.toDataURL("image/png");
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = `qr-${title?.replace(/\s+/g, '-').toLowerCase() || 'card'}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                throw new Error("Canvas not found");
+            }
+        } catch (error) {
+            console.error("Error downloading QR:", error);
+            alert("Error al descargar el código QR. Intente nuevamente.");
+        } finally {
+            setIsDownloading(false);
+        }
+    }, 100);
   };
 
   return (
@@ -67,13 +95,13 @@ export function QRCodeCard({ url, logoUrl, title }: QRCodeCardProps) {
         ref={qrRef}
         className="relative bg-white p-4 rounded-xl shadow-lg"
       >
-        <QRCodeSVG 
+        <QRCodeCanvas 
           value={url} 
           size={200} 
           level="H" // High error correction for logo overlay
           includeMargin={true}
-          imageSettings={logoUrl ? {
-            src: logoUrl,
+          imageSettings={qrLogo ? {
+            src: qrLogo,
             x: undefined,
             y: undefined,
             height: 40,
@@ -81,13 +109,6 @@ export function QRCodeCard({ url, logoUrl, title }: QRCodeCardProps) {
             excavate: true,
           } : undefined}
         />
-        
-        {/* Fallback/Custom Logo Overlay if needed for better styling than imageSettings */}
-        {/* We use imageSettings above which is standard, but we can also do absolute positioning if needed.
-            Let's stick to imageSettings for now as it handles 'excavate' correctly so QR dots don't overlap.
-            However, for a "more professional" look, sometimes a white border around the logo is nice.
-            imageSettings supports this implicitly if the image has a background, but let's see.
-        */}
       </div>
 
       <div className="flex gap-4 w-full">
