@@ -19,7 +19,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
           <a href="#features" className="hover:text-white transition-colors">Beneficios</a>
           <a href="#pricing" className="hover:text-white transition-colors">Precios</a>
-          <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          <a href="#faq" className="hover:text-white transition-colors">Preguntas</a>
           <motion.a
             href="#pricing"
             whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
@@ -48,7 +48,7 @@ export function Navbar() {
         >
           <a href="#features" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Beneficios</a>
           <a href="#pricing" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Precios</a>
-          <a href="#faq" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">FAQ</a>
+          <a href="#faq" onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white">Preguntas</a>
           <a href="#pricing" onClick={() => setIsOpen(false)} className="text-center px-4 py-2 rounded-full bg-gradient-to-r from-primary-start to-primary-end text-white font-bold">
             Empezar
           </a>

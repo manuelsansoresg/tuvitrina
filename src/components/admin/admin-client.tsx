@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { createAdminUser, toggleUserStatus, deleteUser, updateUser } from "@/actions/admin";
+import { logout } from "@/actions/auth";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { Users, DollarSign, Activity, Edit, Trash, Eye, EyeOff, Plus, Shield, Settings, X, Check, ArrowUpRight } from "lucide-react";
+import { Users, DollarSign, Activity, Edit, Trash, Eye, EyeOff, Plus, Shield, Settings, X, Check, ArrowUpRight, LogOut, LayoutTemplate } from "lucide-react";
 
 // --- Custom UI Components ---
 
@@ -106,6 +107,26 @@ export default function AdminClient({ initialUsers, stats, currentUserEmail }: A
         </div>
         
         <div className="flex gap-2">
+            <Button 
+                variant="outline"
+                onClick={() => window.location.href = '/dashboard'}
+                className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-blue-400"
+                title="Ir a mi Tarjeta"
+            >
+                <LayoutTemplate className="mr-2 h-4 w-4" /> Mi Tarjeta
+            </Button>
+            
+            <Button 
+                variant="outline"
+                onClick={() => logout()}
+                className="bg-slate-900 border-red-900/30 text-red-400 hover:bg-red-900/20 hover:text-red-300"
+                title="Cerrar Sesión"
+            >
+                <LogOut className="mr-2 h-4 w-4" /> Salir
+            </Button>
+
+            <div className="w-px h-8 bg-slate-800 mx-2 hidden md:block"></div>
+
             <Button 
                 variant={activeTab === "users" ? "default" : "outline"} 
                 onClick={() => setActiveTab("users")}

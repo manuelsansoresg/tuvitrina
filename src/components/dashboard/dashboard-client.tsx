@@ -5,8 +5,9 @@ import { User, BusinessCard, Link as LinkModel, GalleryImage, Product, PlanType 
 import { PLAN_LIMITS } from "@/lib/constants";
 import { useFormStatus } from "react-dom";
 import { updateBusinessCard } from "@/actions/dashboard";
+import { logout } from "@/actions/auth";
 import { useActionState } from "react";
-import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown } from "lucide-react";
+import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown, LogOut, LayoutDashboard } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 // --- Custom UI Components (Replaces shadcn/ui for simplicity/portability in this env) ---
@@ -89,10 +90,26 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
                         Volver al Admin
                     </Button>
                 )}
+                {!targetUserId && isAdmin && (
+                    <Button variant="outline" size="sm" onClick={() => window.location.href = '/admin'} className="ml-4 text-xs h-6 bg-blue-900/20 border-blue-800 text-blue-400 hover:bg-blue-900/40">
+                        <LayoutDashboard className="mr-1 h-3 w-3" /> Panel Admin
+                    </Button>
+                )}
               </div>
             </div>
             
             <div className="flex items-center gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => logout()}
+                  title="Cerrar Sesión"
+                  className="text-red-400 hover:text-red-300 border-red-900/30 hover:bg-red-900/20"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+                
                 <Button 
                   type="button" 
                   variant="outline" 
