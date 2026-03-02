@@ -66,9 +66,28 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
   const linksJson = formData.get("links") as string;
   const galleryJson = formData.get("gallery") as string;
 
+  // Colors and Background
+  const cardBackgroundColor = formData.get("cardBackgroundColor") as string;
+  const cardBackgroundImage = formData.get("cardBackgroundImage") as string;
+  const titleColor = formData.get("titleColor") as string;
+  const descriptionColor = formData.get("descriptionColor") as string;
+  const galleryTitleColor = formData.get("galleryTitleColor") as string;
+  const galleryPriceColor = formData.get("galleryPriceColor") as string;
+
   // Validate theme color update based on plan
   const finalThemeColor = limits.allowThemeColor ? themeColor : user.businessCard.themeColor;
   
+  // Validate advanced customization based on plan (Using allowThemeColor as a proxy for "Customization" feature for now, or assume available to all or specific plans)
+  // Assuming allowThemeColor covers general color customization
+  const canCustomizeColors = limits.allowThemeColor;
+
+  const finalCardBackgroundColor = canCustomizeColors ? cardBackgroundColor : user.businessCard.cardBackgroundColor;
+  const finalCardBackgroundImage = canCustomizeColors ? cardBackgroundImage : user.businessCard.cardBackgroundImage;
+  const finalTitleColor = canCustomizeColors ? titleColor : user.businessCard.titleColor;
+  const finalDescriptionColor = canCustomizeColors ? descriptionColor : user.businessCard.descriptionColor;
+  const finalGalleryTitleColor = canCustomizeColors ? galleryTitleColor : user.businessCard.galleryTitleColor;
+  const finalGalleryPriceColor = canCustomizeColors ? galleryPriceColor : user.businessCard.galleryPriceColor;
+
   // Validate location update based on plan
   const finalLocation = limits.allowLocation ? location : user.businessCard.location;
 
@@ -85,6 +104,12 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
           slug,
           logoUrl,
           bannerUrl,
+          cardBackgroundColor: finalCardBackgroundColor,
+          cardBackgroundImage: finalCardBackgroundImage,
+          titleColor: finalTitleColor,
+          descriptionColor: finalDescriptionColor,
+          galleryTitleColor: finalGalleryTitleColor,
+          galleryPriceColor: finalGalleryPriceColor,
         },
       });
 
@@ -116,6 +141,8 @@ export async function updateBusinessCard(prevState: any, formData: FormData) {
                     data: gallery.map((img: any, index: number) => ({
                         cardId: user.businessCard!.id,
                         imageUrl: img.imageUrl,
+                        title: img.title,
+                        price: img.price ? parseFloat(img.price) : null,
                         order: index,
                     })),
                 });

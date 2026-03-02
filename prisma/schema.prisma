@@ -45,6 +45,15 @@ model BusinessCard {
   themeColor  String?  @default("#000000")
   location    String?  // Google Maps Embed URL or coordinates
   active      Boolean  @default(true)
+  
+  // Customization
+  cardBackgroundColor String? @default("#ffffff")
+  cardBackgroundImage String?
+  titleColor          String? @default("#0f172a") // slate-900
+  descriptionColor    String? @default("#64748b") // slate-500
+  galleryTitleColor   String? @default("#ffffff") // Default white for gallery overlay
+  galleryPriceColor   String? @default("#4ade80") // Default green-400 for gallery overlay
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -70,6 +79,8 @@ model Link {
 model GalleryImage {
   id        String       @id @default(cuid())
   imageUrl  String
+  title     String?
+  price     Float?
   order     Int          @default(0)
   
   cardId    String
