@@ -2,6 +2,57 @@
 
 import { prisma } from "@/lib/prisma"
 
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+
+const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN! });
+
+export async function createSubscriptionPreference(planName: string, price: number) {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const preference = new Preference(client);
+
+  try {
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            id: `plan-${planName.toLowerCase()}`,
+            title: `Plan ${planName} - TuVitrina`,
+            quantity: 1,
+            unit_price: price,
+            currency_id: 'MXN',
+          }
+        ],
+        payer: {
+          email: session.user.email!,
+        },
+        back_urls: {
+          success: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
+          failure: `${process.env.NEXTAUTH_URL}/?payment=failure`,
+          pending: `${process.env.NEXTAUTH_URL}/?payment=pending`,
+        },
+        auto_return: 'approved',
+        metadata: {
+          user_id: session.user.id,
+          plan: planName.toUpperCase(), // 'EXPRESS', 'EMPRENDEDOR', 'PREMIUM'
+        },
+        notification_url: `${process.env.NEXTAUTH_URL}/api/webhooks/mercadopago`,
+      }
+    });
+
+    return { init_point: result.init_point };
+  } catch (error) {
+    console.error("Error creating preference:", error);
+    return { error: "Error al procesar el pago" };
+  }
+}
+
 export async function checkSubscriptionStatus(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },

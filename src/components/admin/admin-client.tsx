@@ -249,7 +249,7 @@ function UsersPanel({
             {/* Edit User Modal */}
             <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Editar Usuario">
                 {selectedUser && (
-                    <form action={updateUserDispatch} className="space-y-4">
+                    <form key={selectedUser.id} action={updateUserDispatch} className="space-y-4">
                         <input type="hidden" name="id" value={selectedUser.id} />
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">Nombre</label>
@@ -331,27 +331,27 @@ function UsersPanel({
                                         <Button 
                                             size="sm" 
                                             variant="ghost" 
-                                            className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+                                            className="h-9 w-9 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
                                             title="Editar Usuario"
                                             onClick={() => handleEditUser(user)}
                                         >
-                                            <Settings className="h-4 w-4" />
+                                            <Settings className="h-5 w-5" />
                                         </Button>
 
                                         <Button 
                                             size="sm" 
                                             variant="ghost" 
-                                            className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                                            className="h-9 w-9 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
                                             title="Editar Tarjeta"
                                             onClick={() => router.push(`/admin/users/${user.id}/card`)}
                                         >
-                                            <Edit className="h-4 w-4" />
+                                            <Edit className="h-5 w-5" />
                                         </Button>
                                         
                                         <Button 
                                             size="sm" 
                                             variant="ghost" 
-                                            className={`h-8 w-8 p-0 ${user.active ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'} hover:bg-slate-800`}
+                                            className={`h-9 w-9 p-0 ${user.active ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'} hover:bg-slate-800`}
                                             title={user.active ? "Desactivar" : "Activar"}
                                             onClick={async () => {
                                                 if (confirm(`¿${user.active ? 'Desactivar' : 'Activar'} usuario?`)) {
@@ -360,14 +360,14 @@ function UsersPanel({
                                             }}
                                             disabled={user.email === superAdminEmail}
                                         >
-                                            {user.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            {user.active ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                         </Button>
 
                                         <Button 
                                             size="sm" 
                                             variant="ghost" 
-                                            className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                                            title="Eliminar"
+                                            className="h-9 w-9 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                                            title="Eliminar Usuario"
                                             onClick={async () => {
                                                 if (confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) {
                                                     await deleteUser(user.id);
@@ -375,7 +375,7 @@ function UsersPanel({
                                             }}
                                             disabled={user.email === superAdminEmail}
                                         >
-                                            <Trash className="h-4 w-4" />
+                                            <Trash className="h-5 w-5" />
                                         </Button>
                                     </div>
                                 </td>

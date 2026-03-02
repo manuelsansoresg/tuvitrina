@@ -2,8 +2,26 @@
 
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { createSubscriptionPreference } from "@/actions/subscription";
 
 export function Pricing() {
+  const handleSubscribe = async (planName: string, priceString: string) => {
+    try {
+      // Remove '$' and ',' to get number
+      const price = parseFloat(priceString.replace('$', '').replace(',', ''));
+      const result = await createSubscriptionPreference(planName, price);
+      
+      if (result.init_point) {
+        window.location.href = result.init_point;
+      } else if (result.error) {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error starting subscription:", error);
+      alert("Hubo un error al iniciar el proceso de pago. Por favor intenta de nuevo.");
+    }
+  };
+
   const plans = [
     {
       name: "Express",
@@ -97,13 +115,14 @@ export function Pricing() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => handleSubscribe(plan.name, plan.price)}
               className={`w-full py-3 rounded-full font-bold transition-all shadow-lg ${
-                plan.highlight
-                  ? "bg-gradient-to-r from-primary-start to-primary-end text-white"
+                plan.highlight 
+                  ? "bg-secondary text-slate-900 hover:bg-yellow-400" 
                   : "bg-slate-700 text-white hover:bg-slate-600"
               }`}
             >
-              Elegir {plan.name}
+              Elegir Plan
             </motion.button>
           </motion.div>
         ))}

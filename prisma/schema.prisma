@@ -89,6 +89,7 @@ model Product {
 
 model Subscription {
   id        String   @id @default(cuid())
+  paymentId String?  @unique // Mercado Pago Payment ID
   amount    Float
   currency  String   @default("MXN")
   status    String   // active, canceled, expired

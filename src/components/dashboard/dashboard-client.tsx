@@ -6,8 +6,9 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { useFormStatus } from "react-dom";
 import { updateBusinessCard } from "@/actions/dashboard";
 import { logout } from "@/actions/auth";
-import { useActionState } from "react";
-import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown, LogOut, LayoutDashboard } from "lucide-react";
+import { useActionState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Save, Lock, Smartphone, MapPin, Image as ImageIcon, LayoutGrid, Palette, QrCode, ShoppingBag, Crown, LogOut, LayoutDashboard, PartyPopper, AlertCircle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 // --- Custom UI Components (Replaces shadcn/ui for simplicity/portability in this env) ---
@@ -51,6 +52,16 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [state, dispatch] = useActionState(updateBusinessCard, null);
   
+  const searchParams = useSearchParams();
+  const paymentStatus = searchParams.get("payment");
+
+  useEffect(() => {
+    if (paymentStatus === "success") {
+      // Could show a toast here. For now, we can rely on the UI updating the plan badge.
+      // Or maybe show a confetti effect or modal.
+    }
+  }, [paymentStatus]);
+  
   // Sync preview with form changes
   const handlePreviewChange = (field: string, value: any) => {
     setPreviewData((prev: any) => ({
@@ -69,6 +80,25 @@ export default function DashboardClient({ data, targetUserId }: { data: Dashboar
     <div className="flex h-screen bg-[#0f172a] overflow-hidden text-slate-200">
       {/* Left Panel - Editor */}
       <div className="w-full lg:w-1/2 flex flex-col border-r border-slate-800 overflow-y-auto custom-scrollbar">
+        {paymentStatus === "success" && (
+          <div className="bg-green-900/30 border-b border-green-800 p-4 flex items-center gap-3 text-green-400 animate-in slide-in-from-top-4">
+            <PartyPopper className="h-5 w-5" />
+            <p className="font-medium">¡Pago exitoso! Tu plan ha sido actualizado. Gracias por tu compra.</p>
+          </div>
+        )}
+        {paymentStatus === "failure" && (
+           <div className="bg-red-900/30 border-b border-red-800 p-4 flex items-center gap-3 text-red-400 animate-in slide-in-from-top-4">
+            <AlertCircle className="h-5 w-5" />
+            <p className="font-medium">El pago no se pudo completar. Por favor intenta de nuevo.</p>
+          </div>
+        )}
+        {paymentStatus === "pending" && (
+           <div className="bg-amber-900/30 border-b border-amber-800 p-4 flex items-center gap-3 text-amber-400 animate-in slide-in-from-top-4">
+            <AlertCircle className="h-5 w-5" />
+            <p className="font-medium">Tu pago se está procesando. Te notificaremos cuando se complete.</p>
+          </div>
+        )}
+
         <header className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl font-bold text-white">

@@ -16,12 +16,28 @@ export async function getAdminStats() {
   console.log("getAdminStats session:", JSON.stringify(session, null, 2));
   if (session?.user?.role !== Role.ADMIN) return null;
 
-  const totalUsers = await prisma.user.count();
-  const activeUsers = await prisma.user.count({ where: { active: true } });
+  const totalUsers = await prisma.user.count({
+    where: {
+      email: { not: SUPER_ADMIN_EMAIL }
+    }
+  });
+  
+  const activeUsers = await prisma.user.count({ 
+    where: { 
+      active: true,
+      email: { not: SUPER_ADMIN_EMAIL }
+    } 
+  });
   
   // Calculate total earnings from subscriptions
+  // Exclude subscriptions from Super Admin
   const subscriptions = await prisma.subscription.findMany({
-    where: { status: "active" }, // Assuming we only count active payments or use a Transaction model in real app
+    where: { 
+      status: "active",
+      user: {
+        email: { not: SUPER_ADMIN_EMAIL }
+      }
+    },
   });
   
   const totalEarnings = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
@@ -29,6 +45,9 @@ export async function getAdminStats() {
   // Group users by plan
   const usersByPlan = await prisma.user.groupBy({
     by: ['plan'],
+    where: {
+      email: { not: SUPER_ADMIN_EMAIL }
+    },
     _count: {
       plan: true,
     },
