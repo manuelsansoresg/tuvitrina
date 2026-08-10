@@ -95,6 +95,7 @@ const UpdateUserSchema = z.object({
   role: z.nativeEnum(Role),
   plan: z.nativeEnum(PlanType),
   password: z.string().optional(),
+  subscriptionEnd: z.string().optional(),
 });
 
 export async function updateUser(prevState: any, formData: FormData) {
@@ -113,7 +114,7 @@ export async function updateUser(prevState: any, formData: FormData) {
         return { message: "Datos inválidos", success: false };
     }
 
-    const { id, name, email, role, plan, password } = validated.data;
+    const { id, name, email, role, plan, password, subscriptionEnd } = validated.data;
 
     const targetUser = await prisma.user.findUnique({ where: { id } });
     
@@ -133,7 +134,16 @@ export async function updateUser(prevState: any, formData: FormData) {
 
     try {
         const updateData: any = { name, email, role, plan };
-        
+
+        if (subscriptionEnd) {
+            const date = new Date(subscriptionEnd);
+            if (!isNaN(date.getTime())) {
+                updateData.subscriptionEnd = date;
+            }
+        } else if (subscriptionEnd === "") {
+            updateData.subscriptionEnd = null;
+        }
+
         if (password && password.length >= 6) {
             updateData.password = await bcrypt.hash(password, 10);
         } else if (password && password.length < 6) {

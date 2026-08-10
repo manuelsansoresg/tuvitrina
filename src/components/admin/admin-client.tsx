@@ -280,6 +280,17 @@ function UsersPanel({
                                 </Select>
                             </div>
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300">
+                                Caducidad del Plan
+                                <span className="ml-2 text-xs text-slate-500">(Dejar vacío para sin caducidad)</span>
+                            </label>
+                            <Input
+                                name="subscriptionEnd"
+                                type="date"
+                                defaultValue={selectedUser.subscriptionEnd ? new Date(selectedUser.subscriptionEnd).toISOString().split('T')[0] : ''}
+                            />
+                        </div>
                         
                         {updateUserState?.message && (
                             <p className={`text-sm ${updateUserState.success ? 'text-green-400' : 'text-red-400'}`}>
@@ -300,6 +311,7 @@ function UsersPanel({
                             <th className="px-6 py-3">Rol</th>
                             <th className="px-6 py-3">Plan</th>
                             <th className="px-6 py-3">Estado</th>
+                            <th className="px-6 py-3">Caducidad</th>
                             <th className="px-6 py-3 text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -329,6 +341,20 @@ function UsersPanel({
                                     <Badge variant={user.active ? "success" : "destructive"}>
                                         {user.active ? "Activo" : "Inactivo"}
                                     </Badge>
+                                </td>
+                                <td className="px-6 py-4">
+                                    {user.subscriptionEnd ? (
+                                        <div className="flex flex-col">
+                                            <span className={`text-xs ${new Date(user.subscriptionEnd) < new Date() ? 'text-red-400' : 'text-slate-400'}`}>
+                                                {new Date(user.subscriptionEnd).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </span>
+                                            {new Date(user.subscriptionEnd) < new Date() && (
+                                                <span className="text-[10px] text-red-500 font-medium">Caducado</span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span className="text-xs text-slate-500">—</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-3">
