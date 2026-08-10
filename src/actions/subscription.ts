@@ -60,21 +60,44 @@ export async function checkSubscriptionStatus(userId: string) {
   })
 
   if (!user) return { error: "User not found" }
-  
-  // If no subscription end date, assume inactive or free tier depending on logic
-  // Here we assume it's required for active status
+
+  // Si el usuario está desactivado, la tarjeta está inactiva
+  if (!user.active) {
+    if (user.businessCard?.active) {
+      await prisma.businessCard.update({
+        where: { userId },
+        data: { active: false }
+      })
+    }
+    return { status: "inactive" }
+  }
+
+  // El plan EXPRESS es el plan base/gratuito, no requiere caducidad
+  if (user.plan === "EXPRESS") {
+    // Reactivar tarjeta si estaba inactiva
+    if (!user.businessCard?.active) {
+      await prisma.businessCard.update({
+        where: { userId },
+        data: { active: true }
+      })
+    }
+    return { status: "active" }
+  }
+
+  // Para planes pagos (EMPRENDEDOR, PREMIUM), verificar caducidad
   if (!user.subscriptionEnd) {
-     if (user.businessCard?.active) {
-       await prisma.businessCard.update({
-         where: { userId },
-         data: { active: false }
-       })
-     }
-     return { status: "inactive" }
+    // Sin fecha de caducidad para plan pago = inactivo
+    if (user.businessCard?.active) {
+      await prisma.businessCard.update({
+        where: { userId },
+        data: { active: false }
+      })
+    }
+    return { status: "inactive" }
   }
 
   if (new Date() > user.subscriptionEnd) {
-    // Subscription expired
+    // Suscripción caducada
     if (user.businessCard?.active) {
       await prisma.businessCard.update({
         where: { userId },
@@ -83,13 +106,23 @@ export async function checkSubscriptionStatus(userId: string) {
     }
     return { status: "expired" }
   }
-  
+
+  // Suscripción activa - reactivar tarjeta si estaba inactiva
+  if (!user.businessCard?.active) {
+    await prisma.businessCard.update({
+      where: { userId },
+      data: { active: true }
+    })
+  }
   return { status: "active" }
 }
 
 export async function checkAllSubscriptions() {
   const expiredUsers = await prisma.user.findMany({
     where: {
+      plan: {
+        in: ["EMPRENDEDOR", "PREMIUM"]
+      },
       subscriptionEnd: {
         lt: new Date()
       },

@@ -72,11 +72,11 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
   // Type assertion to bypass linter issues if Prisma types aren't fully synced in editor
   const extendedCard = card as any;
 
-  // Verify subscription status
+  // Verify subscription status (this also reactivates card if needed)
   const subStatus = await checkSubscriptionStatus(card.userId)
-  
-  // If card is explicitly inactive or subscription is expired/inactive
-  if (!card.active || (subStatus && subStatus.status !== "active")) {
+
+  // If subscription is expired/inactive, show unavailable message
+  if (subStatus && subStatus.status !== "active") {
      return (
        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4 text-center">
          <div>
