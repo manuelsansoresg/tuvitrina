@@ -117,8 +117,8 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div 
-        className="w-full max-w-md min-h-screen shadow-2xl overflow-hidden relative flex flex-col"
+      <div
+        className="w-full max-w-md lg:max-w-5xl min-h-screen shadow-2xl overflow-hidden relative flex flex-col"
         style={{
           backgroundColor: extendedCard.cardBackgroundColor || '#ffffff',
           backgroundImage: extendedCard.cardBackgroundImage ? `url(${extendedCard.cardBackgroundImage})` : undefined,
@@ -127,22 +127,25 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           color: extendedCard.descriptionColor || '#64748b'
         }}
       >
-         
+
          {/* Hero Banner */}
-         <div 
-            className="h-40 relative flex items-center justify-center bg-cover bg-center bg-no-repeat" 
-            style={{ 
-              backgroundColor: extendedCard.themeColor || '#000000',
-              backgroundImage: extendedCard.bannerUrl ? `url(${extendedCard.bannerUrl})` : undefined
-            }}
-         >
-            <div className="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg absolute -bottom-12 flex items-center justify-center text-3xl font-bold text-slate-800 overflow-hidden z-10">
+         <div className="relative">
+            {extendedCard.bannerUrl && (
+               <div className="relative w-full">
+                  <img
+                    src={extendedCard.bannerUrl}
+                    alt={extendedCard.title}
+                    className="w-full h-auto object-contain"
+                  />
+               </div>
+            )}
+            <div className="w-24 h-24 lg:w-32 lg:h-32 bg-white rounded-full border-4 border-white shadow-lg absolute -bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center text-3xl font-bold text-slate-800 overflow-hidden p-3">
                {extendedCard.logoUrl ? (
-                  <Image 
-                    src={extendedCard.logoUrl} 
-                    alt={extendedCard.title} 
-                    fill 
-                    className="object-cover" 
+                  <Image
+                    src={extendedCard.logoUrl}
+                    alt={extendedCard.title}
+                    fill
+                    className="object-contain"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                ) : (
@@ -150,18 +153,18 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                )}
             </div>
          </div>
-         
+
          {/* Content */}
          <div className="mt-14 px-6 text-center pb-10 flex-1">
-            <h1 
-              className="text-2xl font-bold leading-tight mb-2"
+            <h1
+              className="text-2xl lg:text-4xl font-bold leading-tight mb-2"
               style={{ color: extendedCard.titleColor || '#0f172a' }}
             >
               {extendedCard.title}
             </h1>
             {extendedCard.description && (
-               <p 
-                 className="text-sm whitespace-pre-wrap mb-6"
+               <p
+                 className="text-sm lg:text-base whitespace-pre-wrap mb-6 max-w-2xl mx-auto"
                  style={{ color: extendedCard.descriptionColor || '#64748b' }}
                >
                  {extendedCard.description}
@@ -169,23 +172,22 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             )}
 
             {/* Links Section */}
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-8 max-w-xl mx-auto">
                {extendedCard.links.length > 0 ? (
                  extendedCard.links.map((link: any) => {
                    const IconComp = IconMap[link.icon || 'link'] || LinkIcon;
-                   // Si es whatsapp, asegurar formato wa.me
-                   const href = link.icon === 'whatsapp' && !link.url.startsWith('http') 
+                   const href = link.icon === 'whatsapp' && !link.url.startsWith('http')
                       ? `https://wa.me/${link.url.replace(/[^0-9]/g, '')}`
                       : link.url;
-                      
+
                    return (
-                     <a 
-                       key={link.id} 
-                       href={href} 
-                       target="_blank" 
-                       rel="noopener noreferrer" 
+                     <a
+                       key={link.id}
+                       href={href}
+                       target="_blank"
+                       rel="noopener noreferrer"
                        className="block p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-blue-500 hover:shadow-md transition-all flex items-center gap-3 group"
-                       style={{ 
+                       style={{
                           borderColor: extendedCard.linkBorderColor || (extendedCard.themeColor ? `${extendedCard.themeColor}40` : undefined),
                           backgroundColor: extendedCard.linkBackgroundColor || undefined,
                        }}
@@ -193,13 +195,13 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-colors text-slate-700">
                           <IconComp size={20} className={link.icon === 'whatsapp' ? 'text-green-600' : link.icon === 'instagram' ? 'text-pink-600' : link.icon === 'facebook' ? 'text-blue-600' : link.icon === 'youtube' ? 'text-red-600' : 'text-slate-700'} style={{ color: extendedCard.iconColor || undefined }} />
                        </div>
-                       <span 
+                       <span
                          className="font-medium flex-1 text-left"
                          style={{ color: extendedCard.linkTextColor || extendedCard.titleColor || '#0f172a' }}
                        >
                          {link.label}
                        </span>
-                       <span 
+                       <span
                          className="transition-colors"
                          style={{ color: extendedCard.linkTextColor || extendedCard.descriptionColor || '#94a3b8' }}
                        >
@@ -211,49 +213,52 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                ) : null}
             </div>
 
-            {/* Gallery Section */}
-            {extendedCard.gallery.length > 0 && (
-               <div className="mb-8">
-                  <h2 
-                    className="text-sm font-bold mb-3 text-left uppercase tracking-wider"
-                    style={{ color: extendedCard.titleColor || '#0f172a' }}
-                  >
-                    Galería
-                  </h2>
-                  <GalleryViewer 
-                    images={extendedCard.gallery} 
-                    themeColor={extendedCard.themeColor || '#000000'}
-                    galleryTitleColor={extendedCard.galleryTitleColor}
-                    galleryPriceColor={extendedCard.galleryPriceColor}
-                  />
-               </div>
-            )}
-            
-            {/* Location Map */}
-            {extendedCard.location && (
-               <div className="mb-8">
-                  <h2 
-                    className="text-sm font-bold mb-3 text-left uppercase tracking-wider"
-                    style={{ color: extendedCard.titleColor || '#0f172a' }}
-                  >
-                    Ubicación
-                  </h2>
-                  <div className="rounded-xl overflow-hidden border border-white/20 h-48 bg-slate-100 relative">
-                     <iframe 
-                       src={extendedCard.location} 
-                       width="100%" 
-                       height="100%" 
-                       style={{ border: 0 }} 
-                       allowFullScreen 
-                       loading="lazy" 
-                       referrerPolicy="no-referrer-when-downgrade"
-                       className="absolute inset-0"
+            {/* Gallery + Map: two columns on desktop, stacked on mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+               {/* Gallery Section */}
+               {extendedCard.gallery.length > 0 && (
+                  <div>
+                     <h2
+                       className="text-sm font-bold mb-3 text-left uppercase tracking-wider"
+                       style={{ color: extendedCard.titleColor || '#0f172a' }}
+                     >
+                       Galería
+                     </h2>
+                     <GalleryViewer
+                       images={extendedCard.gallery}
+                       themeColor={extendedCard.themeColor || '#000000'}
+                       galleryTitleColor={extendedCard.galleryTitleColor}
+                       galleryPriceColor={extendedCard.galleryPriceColor}
                      />
                   </div>
-               </div>
-            )}
+               )}
+
+               {/* Location Map */}
+               {extendedCard.location && (
+                  <div>
+                     <h2
+                       className="text-sm font-bold mb-3 text-left uppercase tracking-wider"
+                       style={{ color: extendedCard.titleColor || '#0f172a' }}
+                     >
+                       Ubicación
+                     </h2>
+                     <div className="rounded-xl overflow-hidden border border-white/20 h-48 lg:h-full min-h-[200px] bg-slate-100 relative">
+                        <iframe
+                          src={extendedCard.location}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          className="absolute inset-0"
+                        />
+                     </div>
+                  </div>
+               )}
+            </div>
          </div>
-         
+
          {/* Footer */}
          <div className="py-6 text-center border-t border-white/10" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
             <p className="text-[10px] font-medium" style={{ color: extendedCard.descriptionColor || '#94a3b8' }}> 2025 TuVitrina. Todos los derechos reservados. | Desarrollado por  <a href="https://www.facebook.com/profile.php?id=100068794671008" target="_blank">XpertSystems</a> </p>
