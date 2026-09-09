@@ -1,5 +1,4 @@
 
-// Define limits per plan
 export const PLAN_LIMITS = {
   EXPRESS: {
     links: 3,
@@ -7,6 +6,7 @@ export const PLAN_LIMITS = {
     products: 0,
     allowLocation: false,
     allowThemeColor: false,
+    allowBooking: false,
     maxSlugLength: 30,
   },
   EMPRENDEDOR: {
@@ -15,6 +15,7 @@ export const PLAN_LIMITS = {
     products: 5,
     allowLocation: true,
     allowThemeColor: true,
+    allowBooking: true,
     maxSlugLength: 50,
   },
   PREMIUM: {
@@ -23,6 +24,7 @@ export const PLAN_LIMITS = {
     products: 50,
     allowLocation: true,
     allowThemeColor: true,
+    allowBooking: true,
     maxSlugLength: 100,
   },
 };

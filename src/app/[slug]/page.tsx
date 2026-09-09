@@ -4,6 +4,7 @@ import Image from "next/image"
 import { checkSubscriptionStatus } from "@/actions/subscription"
 import { GalleryViewer } from "@/components/gallery-viewer";
 import { QRCodeCard } from "@/components/QRCodeCard";
+import { PublicBookingFlow } from "@/components/booking/public-booking-flow";
 import { headers } from "next/headers";
 import { Metadata } from "next";
 import { 
@@ -76,16 +77,16 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
   const subStatus = await checkSubscriptionStatus(card.userId)
 
   // If subscription is expired/inactive, show unavailable message
-  if (subStatus && subStatus.status !== "active") {
-     return (
-       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4 text-center">
-         <div>
-            <h1 className="text-3xl font-bold mb-4">Tarjeta No Disponible</h1>
-            <p className="text-slate-400">Esta tarjeta digital ha expirado o se encuentra inactiva.</p>
-         </div>
-       </div>
-     )
-  }
+   if (subStatus && subStatus.status !== "active") {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4 text-center">
+          <div>
+             <h1 className="text-3xl font-bold mb-4">Tarjeta No Disponible</h1>
+             <p className="text-slate-400">Esta tarjeta digital ha expirado o se encuentra inactiva.</p>
+          </div>
+        </div>
+      )
+   }
 
   const IconMap: any = {
       whatsapp: MessageCircle,
@@ -100,6 +101,32 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
       map: MapPin,
       link: LinkIcon
   };
+
+  let bookingData = null;
+  const bookingSettings = await prisma.bookingSettings.findUnique({
+    where: { cardId: extendedCard.id },
+  });
+  if (bookingSettings?.enabled) {
+    const bookingServices = await prisma.bookingService.findMany({
+      where: { cardId: extendedCard.id, active: true },
+      orderBy: [{ order: "asc" }, { name: "asc" }],
+    });
+    if (bookingServices.length > 0) {
+      bookingData = {
+        cardId: extendedCard.id,
+        businessName: extendedCard.title,
+        location: extendedCard.location,
+        timezone: bookingSettings.timezone,
+        services: bookingServices.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          durationMinutes: s.durationMinutes,
+          price: s.price,
+        })),
+      };
+    }
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -256,10 +283,23 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
                      </div>
                   </div>
                )}
-            </div>
-         </div>
+             </div>
 
-         {/* Footer */}
+             {/* Booking Section */}
+             {bookingData && (
+                <div className="mb-8 max-w-xl mx-auto">
+                   <PublicBookingFlow
+                     cardId={bookingData.cardId}
+                     businessName={bookingData.businessName}
+                     location={bookingData.location}
+                     timezone={bookingData.timezone}
+                     services={bookingData.services}
+                   />
+                </div>
+             )}
+          </div>
+
+          {/* Footer */}
          <div className="py-6 text-center border-t border-white/10" style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
             <p className="text-[10px] font-medium" style={{ color: extendedCard.descriptionColor || '#94a3b8' }}> 2025 TuVitrina. Todos los derechos reservados. | Desarrollado por  <a href="https://www.facebook.com/profile.php?id=100068794671008" target="_blank">XpertSystems</a> </p>
          </div>

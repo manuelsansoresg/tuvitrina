@@ -12,7 +12,7 @@ import {
   MapPin, Link as LinkIcon, Save, Eye, Smartphone, 
   LayoutTemplate, Palette, Lock, Upload, Check, Copy, X, ArrowLeft,
   Info, Facebook, Instagram, Twitter, Linkedin, Youtube, MessageCircle, Mail, Phone, Globe,
-  QrCode
+  QrCode, CalendarDays
 } from "lucide-react";
 import { QRCodeCard } from "@/components/QRCodeCard";
 import {
@@ -309,6 +309,16 @@ export function DashboardClient({ data, targetUserId, isSessionAdmin }: Dashboar
             <TabButton active={activeTab === "qr"} onClick={() => setActiveTab("qr")} icon={<QrCode size={18} />}>
               QR
             </TabButton>
+
+            {(limits as any).allowBooking && (
+              <button
+                onClick={() => (window.location.href = "/dashboard/agenda")}
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+              >
+                <CalendarDays size={18} />
+                Agenda
+              </button>
+            )}
             
             {/* Pestaña de Productos (Deshabilitada por solicitud) */}
             {/* {limits.products > 0 && (

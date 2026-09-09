@@ -19,6 +19,20 @@ enum PlanType {
   PREMIUM
 }
 
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
 model User {
   id              String         @id @default(cuid())
   email           String         @unique
@@ -67,6 +81,12 @@ model BusinessCard {
   links       Link[]
   gallery     GalleryImage[]
   products    Product[]
+
+  bookingSettings  BookingSettings?
+  bookingServices  BookingService[]
+  availabilityRules AvailabilityRule[]
+  bookings         Booking[]
+  bookingBlocks    BookingBlock[]
 }
 
 model Link {
@@ -114,4 +134,96 @@ model Subscription {
   
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BookingSettings {
+  id           String @id @default(cuid())
+  cardId       String @unique
+  enabled      Boolean @default(false)
+  slotInterval Int    @default(30)
+  timezone     String @default("America/Merida")
+
+  card BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model BookingService {
+  id            String  @id @default(cuid())
+  cardId        String
+  name          String
+  description   String?
+  durationMinutes Int
+  price         Float?
+  active        Boolean @default(true)
+  order         Int     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  card     BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([cardId, active])
+}
+
+model AvailabilityRule {
+  id        String  @id @default(cuid())
+  cardId    String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  active    Boolean @default(true)
+
+  card BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, dayOfWeek])
+}
+
+model Booking {
+  id             String       @id @default(cuid())
+  cardId         String
+  serviceId      String
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  notes          String?
+  startAt        DateTime
+  endAt          DateTime
+  status         BookingStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  card      BusinessCard    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  service   BookingService  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  reminders BookingReminder[]
+
+  @@index([cardId, startAt, endAt, status])
+  @@index([cardId, startAt])
+}
+
+model BookingBlock {
+  id       String    @id @default(cuid())
+  cardId   String
+  startAt  DateTime
+  endAt    DateTime
+  reason   String?
+  allDay   Boolean   @default(false)
+  createdAt DateTime @default(now())
+
+  card BusinessCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, startAt, endAt])
+}
+
+model BookingReminder {
+  id           String         @id @default(cuid())
+  bookingId    String
+  scheduledFor DateTime
+  type         String         @default("email")
+  status       ReminderStatus @default(PENDING)
+  sentAt       DateTime?
+  attempts     Int            @default(0)
+  createdAt    DateTime       @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledFor])
 }
